@@ -1,0 +1,162 @@
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    color: #666;
+}
+
+.error {
+    color: #c33;
+    background: #fee;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 32px;
+    color: #333;
+}
+
+.logoutBtn {
+    padding: 10px 24px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.logoutBtn:hover {
+    background: #cc0000;
+}
+
+.content h2 {
+    font-size: 24px;
+    color: #555;
+    margin-bottom: 24px;
+}
+
+.usersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.userCard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.userCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #646cff, #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.userInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.userInfo h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.username {
+    margin: 0 0 4px;
+    color: #888;
+    font-size: 14px;
+}
+
+.birthday {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.myProfile {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.avatarLarge {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.myInfo h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.myInfo .username {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    margin: 0 0 8px;
+}
+
+.myInfo .birthday {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    margin: 0;
+}
