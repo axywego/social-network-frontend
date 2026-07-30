@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
+import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
 import styles from './RegisterPage.module.css'
 
@@ -15,6 +16,8 @@ function RegisterPage() {
         patronymic: '',
         birthday: ''
     })
+    const [avatarFile, setAvatarFile] = useState(null)
+    const [avatarPreview, setAvatarPreview] = useState(null)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
@@ -26,12 +29,19 @@ function RegisterPage() {
         }))
     }
 
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        setAvatarFile(file)
+        setAvatarPreview(URL.createObjectURL(file))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
         setLoading(true)
 
-        // Подготовка данных (пустые строки в null)
         const dataToSend = {
             ...formData,
             patronymic: formData.patronymic || null,
@@ -39,16 +49,24 @@ function RegisterPage() {
         }
 
         try {
-            // Регистрируемся
             await authService.register(dataToSend)
-            
-            // Автоматически логинимся
+
             await authService.login({
                 username: formData.username,
                 password: formData.password
             })
-            
+
             login()
+
+            if (avatarFile) {
+                try {
+                    await userService.uploadAvatar(avatarFile)
+                } catch (avatarErr) {
+                    console.error('Ошибка загрузки аватара:', avatarErr)
+                    // не блокируем регистрацию из-за неудачной загрузки фото
+                }
+            }
+
             navigate('/profile')
         } catch (err) {
             if (err.response?.status === 422) {
@@ -67,10 +85,39 @@ function RegisterPage() {
         <div className={styles.container}>
             <div className={styles.card}>
                 <h1 className={styles.title}>Регистрация</h1>
-                
+
                 {error && <div className={styles.error}>{error}</div>}
-                
+
                 <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.field} style={{ textAlign: 'center' }}>
+                        <label
+                            htmlFor="avatar-input"
+                            style={{
+                                display: 'inline-block',
+                                width: 100,
+                                height: 100,
+                                borderRadius: '50%',
+                                background: avatarPreview ? `url(${avatarPreview}) center/cover` : '#e0e0e0',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#888',
+                                fontSize: 12,
+                                overflow: 'hidden'
+                            }}
+                        >
+                            {!avatarPreview && 'Фото'}
+                        </label>
+                        <input
+                            id="avatar-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            style={{ display: 'none' }}
+                        />
+                    </div>
+
                     <div className={styles.field}>
                         <label>Логин *</label>
                         <input
@@ -140,8 +187,8 @@ function RegisterPage() {
                         />
                     </div>
 
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className={styles.button}
                         disabled={loading}
                     >

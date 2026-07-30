@@ -8,10 +8,16 @@ export const userService = {
 
     async getMyProfile() {
         const { data } = await api.get('/users/me')
+        return data
+    },
 
-        const token = localStorage.getItem('accessToken')
-        if (!token) throw new Error('Нет токена')
-    
+    async uploadAvatar(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const { data } = await api.patch('/users/me/change_avatar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
         return data
     }
 }
