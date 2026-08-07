@@ -5,6 +5,7 @@ function Header({title}) {
             <nav>
                 <a href="/">Home</a>
                 <a href="/me"></a>
+                <a href="/chats">Чаты</a>
             </nav>
         </header>
     )

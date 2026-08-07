@@ -1,0 +1,125 @@
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.newGroupBtn {
+    padding: 8px 16px;
+    background: #646cff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.groupForm {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.groupForm input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.groupForm button {
+    padding: 10px 20px;
+    background: #646cff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.chatList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 40px;
+}
+
+.chatItem, .userItem {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.chatItem:hover, .userItem:hover {
+    transform: translateY(-1px);
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #646cff, #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.chatInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.chatName {
+    font-weight: 600;
+    color: #333;
+}
+
+.lastMessage {
+    font-size: 14px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.usersTitle {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 14px;
+}
+
+.usersList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.empty {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.error {
+    color: #c33;
+}

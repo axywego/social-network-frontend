@@ -1,0 +1,110 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.messageRow {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.messageRow.own {
+    justify-content: flex-end;
+}
+
+.bubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #f1f1f1;
+}
+
+.own .bubble {
+    background: #646cff;
+    color: white;
+}
+
+.image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.time {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.inputBar {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+}
+
+.attachBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.textInput {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+}
+
+.sendBtn {
+    padding: 10px 20px;
+    background: #646cff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.error {
+    color: #c33;
+}
