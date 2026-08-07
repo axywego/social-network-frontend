@@ -4,6 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import LoginPage from './pages/LoginPage/LoginPage'
 import RegisterPage from './pages/RegisterPage/RegisterPage'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
+import ChatsPage from './pages/ChatsPage/ChatsPage'
+import ChatWindow from './pages/ChatWindow/ChatWindow'
+
 
 function App() {
     return (
@@ -20,8 +23,8 @@ function App() {
                             </ProtectedRoute>
                         } 
                     />
-                    <Route path="/" element={<Navigate to="/profile" replace />} />
-                    <Route path="*" element={<Navigate to="/profile" replace />} />
+                    <Route path="/chats" element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
+                    <Route path="/chats/:chatId" element={<ProtectedRoute><ChatWindow /></ProtectedRoute>} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
