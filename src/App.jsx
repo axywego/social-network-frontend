@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage/RegisterPage'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
 import ChatsPage from './pages/ChatsPage/ChatsPage'
 import ChatWindow from './pages/ChatWindow/ChatWindow'
+import FriendsPage from './pages/FriendsPage/FriendsPage'
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                     />
                     <Route path="/chats" element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
                     <Route path="/chats/:chatId" element={<ProtectedRoute><ChatWindow /></ProtectedRoute>} />
+                    <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>

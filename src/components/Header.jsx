@@ -6,6 +6,7 @@ function Header({title}) {
                 <a href="/">Home</a>
                 <a href="/me"></a>
                 <a href="/chats">Чаты</a>
+                <a href="/friends">Друзья</a>
             </nav>
         </header>
     )
