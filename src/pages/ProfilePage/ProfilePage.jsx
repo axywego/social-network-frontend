@@ -1,32 +1,49 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useRef } from 'react'
 import { authService } from '../../services/authService'
-import { useAuthContext } from '../../context/AuthContext'
 import { userService } from '../../services/userService'
+import { postService } from '../../services/postService'
+import { useAuthContext } from '../../context/AuthContext'
+import PostCard from '../../components/PostCard'
+import PostComposer from '../../components/PostComposer'
 import styles from './ProfilePage.module.css'
-
-const API_BASE_URL = 'http://127.0.0.1:8000'
 
 function ProfilePage() {
     const navigate = useNavigate()
-    const { logout } = useAuthContext()
-    const [myProfile, setMyProfile] = useState(null)
+    const { logout, currentUser, refreshUser } = useAuthContext()
+    const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [uploading, setUploading] = useState(false)
+    const [editing, setEditing] = useState(false)
+    const [form, setForm] = useState(null)
+    const [error, setError] = useState(null)
     const fileInputRef = useRef(null)
 
     useEffect(() => {
-        loadMyProfile()
+        loadPosts()
     }, [])
 
-    const loadMyProfile = async () => {
+    useEffect(() => {
+        if (currentUser) {
+            setForm({
+                id: currentUser.id,
+                first_name: currentUser.first_name,
+                last_name: currentUser.last_name,
+                patronymic: currentUser.patronymic || '',
+                bio: currentUser.bio || '',
+                birthday: currentUser.birthday || ''
+            })
+        }
+    }, [currentUser])
+
+    const loadPosts = async () => {
         try {
             setLoading(true)
-            const myData = await userService.getMyProfile()
-            setMyProfile(myData)
+            const data = await postService.getMyPosts()
+            setPosts(data)
         } catch (err) {
-            setError('Ошибка загрузки профиля')
+            setError('Не удалось загрузить посты')
             console.error(err)
         } finally {
             setLoading(false)
@@ -39,9 +56,7 @@ function ProfilePage() {
         navigate('/login')
     }
 
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click()
-    }
+    const handleAvatarClick = () => fileInputRef.current?.click()
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0]
@@ -49,14 +64,10 @@ function ProfilePage() {
 
         setUploading(true)
         try {
-            const result = await userService.uploadAvatar(file)
-            // Бэк возвращает { avatar_url: "/static/avatars/..." }
-            setMyProfile(prev => ({ 
-                ...prev, 
-                avatar_url: result.avatar_url 
-            }))
+            await userService.uploadAvatar(file)
+            await refreshUser()
         } catch (err) {
-            console.error('Ошибка загрузки аватара:', err)
+            console.error(err)
             setError('Не удалось загрузить фото')
         } finally {
             setUploading(false)
@@ -64,83 +75,96 @@ function ProfilePage() {
         }
     }
 
-    if (loading) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.loading}>Загрузка...</div>
-            </div>
-        )
+    const handleFormChange = (e) => {
+        const { name, value } = e.target
+        setForm(prev => ({ ...prev, [name]: value }))
     }
 
-    if (error) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.error}>{error}</div>
-                <button onClick={() => {
-                    setError(null)
-                    loadMyProfile()
-                }}>Попробовать снова</button>
-            </div>
-        )
+    const handleSaveInfo = async (e) => {
+        e.preventDefault()
+        try {
+            await userService.changeInfo({
+                first_name: form.first_name,
+                last_name: form.last_name,
+                patronymic: form.patronymic || null,
+                bio: form.bio || null,
+                birthday: form.birthday || null
+            })
+            await refreshUser()
+            setEditing(false)
+        } catch (err) {
+            console.error(err)
+            setError('Не удалось сохранить изменения')
+        }
+    }
+
+    if (!currentUser || loading) {
+        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
     }
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1>Мой профиль</h1>
-                <button onClick={handleLogout} className={styles.logoutBtn}>
-                    Выйти
-                </button>
+                <button onClick={handleLogout} className={styles.logoutBtn}>Выйти</button>
             </div>
 
-            {myProfile && (
-                <div className={styles.myProfile}>
-                    <div
-                        className={styles.avatarLarge}
-                        onClick={handleAvatarClick}
-                        style={{ cursor: 'pointer', position: 'relative' }}
-                    >
-                        {myProfile.avatar_url ? (
-                            <img
-                                src={`${API_BASE_URL}${myProfile.avatar_url}`}
-                                alt="avatar"
-                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                            />
-                        ) : (
-                            <>{myProfile.first_name[0]}{myProfile.last_name[0]}</>
-                        )}
+            {error && <div className={styles.error}>{error}</div>}
 
-                        {uploading && (
-                            <div style={{
-                                position: 'absolute', inset: 0,
-                                background: 'rgba(0,0,0,0.5)', borderRadius: '50%',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#fff', fontSize: 12
-                            }}>
-                                ...
-                            </div>
-                        )}
-                    </div>
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        style={{ display: 'none' }}
-                    />
-
-                    <div className={styles.myInfo}>
-                        <h2>{myProfile.last_name} {myProfile.first_name} {myProfile.patronymic || ''}</h2>
-                        <p className={styles.username}>@{myProfile.username}</p>
-                        {myProfile.birthday && (
-                            <p className={styles.birthday}>
-                                🎂 {new Date(myProfile.birthday).toLocaleDateString('ru-RU')}
-                            </p>
-                        )}
-                    </div>
+            <div className={styles.myProfile}>
+                <div className={styles.avatarLarge} onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
+                    {currentUser.avatar_url ? (
+                        <img
+                            src={`http://127.0.0.1:8000${currentUser.avatar_url}`}
+                            alt="avatar"
+                            style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <>{currentUser.first_name?.[0]}{currentUser.last_name?.[0]}</>
+                    )}
+                    {uploading && <div className={styles.uploadOverlay}>...</div>}
                 </div>
-            )}
+
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+
+                {!editing ? (
+                    <div className={styles.myInfo}>
+                        <h2>{currentUser.last_name} {currentUser.first_name} {currentUser.patronymic || ''}</h2>
+                        <p className={styles.username}>@{currentUser.username}</p>
+                        {currentUser.bio && <p className={styles.bio}>{currentUser.bio}</p>}
+                        {currentUser.birthday && (
+                            <p className={styles.birthday}>🎂 {new Date(currentUser.birthday).toLocaleDateString('ru-RU')}</p>
+                        )}
+                        <button className={styles.editBtn} onClick={() => setEditing(true)}>Редактировать профиль</button>
+                    </div>
+                ) : (
+                    <form className={styles.editForm} onSubmit={handleSaveInfo}>
+                        <input name="first_name" value={form.first_name} onChange={handleFormChange} placeholder="Имя" required />
+                        <input name="last_name" value={form.last_name} onChange={handleFormChange} placeholder="Фамилия" required />
+                        <input name="patronymic" value={form.patronymic} onChange={handleFormChange} placeholder="Отчество" />
+                        <textarea name="bio" value={form.bio} onChange={handleFormChange} placeholder="О себе" rows={2} />
+                        <input name="birthday" type="date" value={form.birthday} onChange={handleFormChange} />
+                        <div className={styles.editFormActions}>
+                            <button type="submit">Сохранить</button>
+                            <button type="button" onClick={() => setEditing(false)}>Отмена</button>
+                        </div>
+                    </form>
+                )}
+            </div>
+
+            <PostComposer onPostCreated={loadPosts} />
+
+            <h2 className={styles.postsTitle}>Мои посты</h2>
+            <div className={styles.feed}>
+                {posts.length === 0 && <p className={styles.empty}>У вас пока нет постов</p>}
+                {posts.map(post => (
+                    <PostCard
+                        post={post}
+                        author={currentUser}
+                        usersById={{ [currentUser.id]: currentUser, me: currentUser }}
+                    />
+                ))}
+            </div>
         </div>
     )
 }

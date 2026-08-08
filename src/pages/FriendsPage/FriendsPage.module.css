@@ -1,160 +1,37 @@
-.container {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 40px 20px;
-}
+/* src/pages/FriendsPage/FriendsPage.module.css */
+.container { max-width: 700px; margin: 0 auto; padding: 30px 20px; }
+.container h1 { margin-bottom: 20px; color: #333; }
 
-.container h1 {
-    margin-bottom: 24px;
-    color: #333;
-}
-
-.sendForm {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.sendForm input {
-    flex: 1;
-    padding: 10px 14px;
+.searchInput {
+    width: 100%;
+    padding: 12px 16px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 15px;
-}
-
-.sendForm button {
-    padding: 10px 20px;
-    background: #646cff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.sendForm button:disabled {
-    background: #999;
-    cursor: not-allowed;
-}
-
-.success {
-    background: #eafbe7;
-    color: #2a7a2a;
-    padding: 10px 14px;
-    border-radius: 8px;
     margin-bottom: 20px;
-    font-size: 14px;
+    box-sizing: border-box;
 }
 
-.error {
-    background: #fee;
-    color: #c33;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
+.success { background: #eafbe7; color: #2a7a2a; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+.error { background: #fee; color: #c33; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
 
-.tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid #eee; }
+.tab, .tabActive { padding: 10px 18px; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: 15px; color: #888; }
+.tabActive { color: #646cff; border-bottom-color: #646cff; font-weight: 600; }
 
-.tab, .tabActive {
-    padding: 10px 18px;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    font-size: 15px;
-    color: #888;
-}
+.list { display: flex; flex-direction: column; gap: 8px; }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.clickable { display: flex; align-items: center; gap: 14px; cursor: pointer; flex: 1; min-width: 0; }
 
-.tabActive {
-    color: #646cff;
-    border-bottom-color: #646cff;
-    font-weight: 600;
-}
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #646cff, #8b5cf6); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+.info { flex: 1; min-width: 0; }
+.name { font-weight: 600; color: #333; }
+.username { font-size: 14px; color: #888; }
 
-.list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+.actions { display: flex; gap: 8px; }
+.acceptBtn { padding: 8px 14px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.declineBtn, .removeBtn { padding: 8px 14px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.addBtn { padding: 8px 14px; background: #646cff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
 
-.item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #646cff, #8b5cf6);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.info {
-    flex: 1;
-    min-width: 0;
-}
-
-.name {
-    font-weight: 600;
-    color: #333;
-}
-
-.username {
-    font-size: 14px;
-    color: #888;
-}
-
-.actions {
-    display: flex;
-    gap: 8px;
-}
-
-.acceptBtn {
-    padding: 8px 14px;
-    background: #22c55e;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.declineBtn, .removeBtn {
-    padding: 8px 14px;
-    background: #ff4444;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.empty {
-    color: #888;
-    text-align: center;
-    padding: 30px;
-}
-
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-}
+.empty { color: #888; text-align: center; padding: 30px; }
+.loading { text-align: center; padding: 40px; color: #666; }

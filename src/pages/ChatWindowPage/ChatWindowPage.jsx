@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { chatService } from '../../services/chatService'
-import { userService } from '../../services/userService'
+import { useAuthContext } from '../../context/AuthContext'
 import ChatImage from '../../components/ChatImage'
-import styles from './ChatWindow.module.css'
+import styles from './ChatWindowPage.module.css'
 
-function ChatWindow() {
+function ChatWindowPage() {
     const { chatId } = useParams()
     const navigate = useNavigate()
+    const { currentUser } = useAuthContext()
+
+    const [chatName, setChatName] = useState('')
     const [messages, setMessages] = useState([])
-    const [currentUser, setCurrentUser] = useState(null)
     const [text, setText] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -28,11 +30,12 @@ function ChatWindow() {
     const loadData = async () => {
         try {
             setLoading(true)
-            const [me, msgs] = await Promise.all([
-                userService.getMyProfile(),
+            const [chats, msgs] = await Promise.all([
+                chatService.getChats(),
                 chatService.getMessages(chatId)
             ])
-            setCurrentUser(me)
+            const chat = chats.find(c => c.chat_id === chatId)
+            setChatName(chat?.name || 'Чат')
             setMessages(msgs)
         } catch (err) {
             setError('Не удалось загрузить чат')
@@ -53,10 +56,6 @@ function ChatWindow() {
         } catch (err) {
             console.error(err)
         }
-    }
-
-    const handleImageClick = () => {
-        fileInputRef.current?.click()
     }
 
     const handleImageChange = async (e) => {
@@ -85,7 +84,7 @@ function ChatWindow() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={() => navigate('/chats')}>←</button>
-                <h2>Чат</h2>
+                <h2>{chatName}</h2>
             </div>
 
             {error && <div className={styles.error}>{error}</div>}
@@ -96,9 +95,7 @@ function ChatWindow() {
                     return (
                         <div key={i} className={`${styles.messageRow} ${isOwn ? styles.own : ''}`}>
                             <div className={styles.bubble}>
-                                {m.image_url && (
-                                    <ChatImage imageUrl={m.image_url} className={styles.image} />
-                                )}
+                                {m.image_url && <ChatImage imageUrl={m.image_url} className={styles.image} />}
                                 {m.content && <div className={styles.text}>{m.content}</div>}
                                 <div className={styles.time}>
                                     {new Date(m.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
@@ -111,7 +108,7 @@ function ChatWindow() {
             </div>
 
             <form className={styles.inputBar} onSubmit={handleSend}>
-                <button type="button" className={styles.attachBtn} onClick={handleImageClick} disabled={uploading}>
+                <button type="button" className={styles.attachBtn} onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                     📎
                 </button>
                 <input
@@ -134,4 +131,4 @@ function ChatWindow() {
     )
 }
 
-export default ChatWindow
+export default ChatWindowPage

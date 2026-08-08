@@ -51,12 +51,8 @@ function RegisterPage() {
         try {
             await authService.register(dataToSend)
 
-            await authService.login({
-                username: formData.username,
-                password: formData.password
-            })
-
-            login()
+            await authService.login({ username: formData.username, password: formData.password })
+            await login()
 
             if (avatarFile) {
                 try {
@@ -67,7 +63,7 @@ function RegisterPage() {
                 }
             }
 
-            navigate('/profile')
+            navigate('/feed')
         } catch (err) {
             if (err.response?.status === 422) {
                 const details = err.response.data.detail

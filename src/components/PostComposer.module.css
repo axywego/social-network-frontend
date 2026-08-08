@@ -1,0 +1,75 @@
+/* src/components/PostComposer.module.css */
+.postForm {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.postForm textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    padding: 6px 0;
+}
+
+.previewWrap {
+    position: relative;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.preview {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.removePreview {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.formActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.attachBtn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.postBtn {
+    padding: 8px 20px;
+    background: #646cff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.postBtn:disabled {
+    background: #999;
+    cursor: not-allowed;
+}

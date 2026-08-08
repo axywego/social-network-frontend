@@ -29,8 +29,8 @@ function LoginPage() {
 
         try {
             await authService.login(formData)
-            login()
-            navigate('/profile')
+            await login()
+            navigate('/feed')
         } catch (err) {
             if (err.response?.status === 422) {
                 setError('Неверный логин или пароль')

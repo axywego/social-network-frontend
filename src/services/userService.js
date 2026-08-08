@@ -11,6 +11,16 @@ export const userService = {
         return data
     },
 
+    async getUserById(userId) {
+        const { data } = await api.get(`/users/${userId}`)
+        return data
+    },
+
+    async changeInfo(payload) {
+        const { data } = await api.put('/users/me/change_info', payload)
+        return data
+    },
+
     async uploadAvatar(file) {
         const formData = new FormData()
         formData.append('file', file)
