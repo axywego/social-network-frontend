@@ -8,6 +8,7 @@ import { useAuthContext } from '../../context/AuthContext'
 import PostCard from '../../components/PostCard'
 import PostComposer from '../../components/PostComposer'
 import styles from './ProfilePage.module.css'
+import Avatar from '../../components/Avatar'
 
 function ProfilePage() {
     const navigate = useNavigate()
@@ -113,7 +114,7 @@ function ProfilePage() {
 
             <div className={styles.myProfile}>
                 <div className={styles.avatarLarge} onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
-                    {currentUser.avatar_url ? (
+                    {/* {currentUser.avatar_url ? (
                         <img
                             src={`http://127.0.0.1:8000${currentUser.avatar_url}`}
                             alt="avatar"
@@ -121,7 +122,8 @@ function ProfilePage() {
                         />
                     ) : (
                         <>{currentUser.first_name?.[0]}{currentUser.last_name?.[0]}</>
-                    )}
+                    )} */}
+                    <Avatar avatarUrl={currentUser.avatar_url} size={100} />
                     {uploading && <div className={styles.uploadOverlay}>...</div>}
                 </div>
 

@@ -21,10 +21,10 @@ function PostCard({ post, author }) {
         setLikeBusy(true)
         try {
             if (liked) {
-                await postService.unlikePost(post.post_id)
+                await postService.unlikePost(post.id)
                 setLikesCount(c => c - 1)
             } else {
-                await postService.likePost(post.post_id)
+                await postService.likePost(post.id)
                 setLikesCount(c => c + 1)
             }
             setLiked(v => !v)

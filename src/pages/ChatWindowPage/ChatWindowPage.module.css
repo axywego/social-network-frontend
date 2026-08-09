@@ -4,6 +4,7 @@
     height: 100vh;
     max-width: 800px;
     margin: 0 auto;
+    background: var(--color-canvas);
 }
 
 .header {
@@ -11,14 +12,36 @@
     align-items: center;
     gap: 12px;
     padding: 16px 20px;
-    border-bottom: 1px solid #eee;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+}
+
+.header h2 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 0;
 }
 
 .backBtn {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
+    color: var(--color-ink-soft);
     cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.backBtn:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
 }
 
 .messages {
@@ -42,29 +65,35 @@
 .bubble {
     max-width: 60%;
     padding: 10px 14px;
-    border-radius: 14px;
-    background: #f1f1f1;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
 }
 
 .own .bubble {
-    background: #646cff;
+    background: var(--color-moss);
+    border-color: var(--color-moss);
     color: white;
 }
 
 .image {
     max-width: 100%;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     margin-bottom: 6px;
+    display: block;
 }
 
 .text {
     white-space: pre-wrap;
     word-break: break-word;
+    font-size: 14.5px;
+    line-height: 1.45;
 }
 
 .time {
+    font-family: var(--font-mono);
     font-size: 11px;
-    opacity: 0.6;
+    opacity: 0.65;
     margin-top: 4px;
     text-align: right;
 }
@@ -72,39 +101,68 @@
 .inputBar {
     display: flex;
     gap: 10px;
-    padding: 16px 20px;
-    border-top: 1px solid #eee;
+    padding: 14px 20px;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-line);
 }
 
 .attachBtn {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
+    color: var(--color-ink-soft);
     cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.attachBtn:hover {
+    background: var(--color-line-soft);
 }
 
 .textInput {
     flex: 1;
-    padding: 10px 14px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
+    padding: 10px 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-family: var(--font-body);
+    background: var(--color-surface-alt);
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.textInput:focus {
+    border-color: var(--color-moss);
 }
 
 .sendBtn {
     padding: 10px 20px;
-    background: #646cff;
+    background: var(--color-moss);
     color: white;
     border: none;
-    border-radius: 20px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-family: var(--font-body);
     cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.sendBtn:hover {
+    background: var(--color-moss-deep);
 }
 
 .loading, .error {
     text-align: center;
     padding: 40px;
-    color: #666;
+    color: var(--color-ink-soft);
 }
 
 .error {
-    color: #c33;
+    color: var(--color-danger);
 }

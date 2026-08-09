@@ -1,6 +1,7 @@
+const API_URL = import.meta.env.VITE_API_URL
+
 function Avatar({ avatarUrl, size = 100 }) {
-  const baseUrl = "http://localhost:8000"
-  const src = avatarUrl ? `${baseUrl}${avatarUrl}` : "/default-avatar.png"
+  const src = avatarUrl ? `${API_URL}${avatarUrl}` : "/default-avatar.png"
 
   return (
     <img

@@ -9,7 +9,7 @@ function Header() {
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
-                <NavLink to="/feed" className={styles.logo}>MyApp</NavLink>
+                <NavLink to="/feed" className={styles.logo}>Coova</NavLink>
                 <nav className={styles.nav}>
                     <NavLink to="/feed" className={({ isActive }) => isActive ? styles.active : styles.link}>
                         Лента

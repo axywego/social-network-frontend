@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
 import styles from './RegisterPage.module.css'
+import Avatar from '../../components/Avatar'
 
 function RegisterPage() {
     const navigate = useNavigate()
-    const { login } = useAuthContext()
+    const { login, refreshUser } = useAuthContext()
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -20,6 +21,7 @@ function RegisterPage() {
     const [avatarPreview, setAvatarPreview] = useState(null)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const avatarInputRef = useRef(null)
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -29,7 +31,12 @@ function RegisterPage() {
         }))
     }
 
-    const handleAvatarChange = (e) => {
+    const handleAvatarClick = () => avatarInputRef.current?.click()
+
+    // На этом шаге пользователя ещё не существует, поэтому файл
+    // не грузим на сервер, а только сохраняем локально и делаем превью.
+    // Реальная загрузка произойдёт в handleSubmit после успешного логина.
+    const handleFileChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
 
@@ -48,6 +55,37 @@ function RegisterPage() {
             birthday: formData.birthday || null
         }
 
+        if (!(/^[a-zA-Z]+$/.test(dataToSend.username))) {
+            setError('Имя пользователя не может содержать кириллицу!')
+            setLoading(false)
+            return
+        }
+
+
+        if (dataToSend.username.includes(' ')){
+            setError('Имя пользователя не может иметь пробелы!')
+            setLoading(false)
+            return
+        }
+
+        if (dataToSend.username.length < 5 && dataToSend.username.length > 14){
+            setError('Имя пользователя не может быть меньше 5 и больше 14 символов!')
+            setLoading(false)
+            return
+        }
+
+        if (!(/^[a-zA-Z0-9@!;:_\-.]+$/.test(dataToSend.password))){
+            setError("Пароль должен содержать только латиницу, цифры и спец. символы: '@', '!', ';', ':', '_', '-' и '.'")
+            setLoading(false)
+            return
+        }
+
+        if (dataToSend.password.length < 8) {
+            setError('Слишком короткий пароль! Минимум 8 символов')
+            setLoading(false)
+            return
+        }
+
         try {
             await authService.register(dataToSend)
 
@@ -57,6 +95,7 @@ function RegisterPage() {
             if (avatarFile) {
                 try {
                     await userService.uploadAvatar(avatarFile)
+                    await refreshUser()
                 } catch (avatarErr) {
                     console.error('Ошибка загрузки аватара:', avatarErr)
                     // не блокируем регистрацию из-за неудачной загрузки фото
@@ -82,34 +121,32 @@ function RegisterPage() {
             <div className={styles.card}>
                 <h1 className={styles.title}>Регистрация</h1>
 
-                {error && <div className={styles.error}>{error}</div>}
-
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.field} style={{ textAlign: 'center' }}>
-                        <label
-                            htmlFor="avatar-input"
-                            style={{
-                                display: 'inline-block',
-                                width: 100,
-                                height: 100,
-                                borderRadius: '50%',
-                                background: avatarPreview ? `url(${avatarPreview}) center/cover` : '#e0e0e0',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#888',
-                                fontSize: 12,
-                                overflow: 'hidden'
-                            }}
+                        <div
+                            onClick={handleAvatarClick}
+                            style={{ cursor: 'pointer', display: 'inline-block' }}
                         >
-                            {!avatarPreview && 'Фото'}
-                        </label>
+                            {avatarPreview ? (
+                                // Avatar-компонент не умеет в blob: URL (он всегда клеит API_URL),
+                                // поэтому локальное превью рендерим обычным img напрямую
+                                <img
+                                    src={avatarPreview}
+                                    alt="avatar preview"
+                                    width={150}
+                                    height={150}
+                                    style={{ borderRadius: '50%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <Avatar avatarUrl={null} size={150} />
+                            )}
+                        </div>
                         <input
                             id="avatar-input"
+                            ref={avatarInputRef}
                             type="file"
                             accept="image/*"
-                            onChange={handleAvatarChange}
+                            onChange={handleFileChange}
                             style={{ display: 'none' }}
                         />
                     </div>
@@ -182,6 +219,8 @@ function RegisterPage() {
                             onChange={handleChange}
                         />
                     </div>
+
+                    {error && <div className={styles.error}>{error}</div>}
 
                     <button
                         type="submit"

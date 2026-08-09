@@ -1,6 +1,6 @@
 import api from './api'
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_URL = import.meta.env.VITE_API_URL
 
 export const postService = {
     async getFeed() {
@@ -47,6 +47,6 @@ export const postService = {
     },
 
     resolveImageUrl(imageUrl) {
-        return imageUrl ? `${API_BASE_URL}${imageUrl}` : null
+        return imageUrl ? `${API_URL}${imageUrl}` : null
     }
 }

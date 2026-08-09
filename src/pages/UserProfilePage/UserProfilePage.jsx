@@ -7,6 +7,7 @@ import { chatService } from '../../services/chatService'
 import { useAuthContext } from '../../context/AuthContext'
 import PostCard from '../../components/PostCard'
 import styles from './UserProfilePage.module.css'
+import Avatar from '../../components/Avatar'
 
 function UserProfilePage() {
     const { userId } = useParams()
@@ -90,12 +91,7 @@ function UserProfilePage() {
 
     const handleMessage = async () => {
         try {
-            let chat = await chatService.getDirectChat(userId)
-            if (chat) {
-                navigate(`/chats/${chat.chat_id}`)
-                return
-            }
-            chat = await chatService.createChat({ type: 'direct', user_if_direct: userId })
+            const chat = await chatService.getDirectChat(userId)
             navigate(`/chats/${chat.chat_id}`)
         } catch (err) {
             if (err.response?.status === 400) {
@@ -110,6 +106,10 @@ function UserProfilePage() {
                 } catch (innerErr) {
                     console.error(innerErr)
                 }
+            }
+            else if(err.response?.status === 404) {
+                const chat = await chatService.createChat({ type: 'direct', user_if_direct: userId })
+                navigate(`/chats/${chat.chat_id}`)
             }
             console.error(err)
         }
@@ -127,10 +127,7 @@ function UserProfilePage() {
         <div className={styles.container}>
             <div className={styles.profileHeader}>
                 <div className={styles.avatarLarge}>
-                    {profile.avatar_url
-                        ? <img src={`http://127.0.0.1:8000${profile.avatar_url}`} alt="avatar" className={styles.avatarImg} />
-                        : <>{profile.first_name?.[0]}{profile.last_name?.[0]}</>
-                    }
+                    <Avatar avatarUrl={profile.avatar_url} size={100} />
                 </div>
                 <div className={styles.info}>
                     <h1>{profile.last_name} {profile.first_name} {profile.patronymic || ''}</h1>

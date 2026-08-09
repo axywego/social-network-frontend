@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
 import styles from './ChatsPage.module.css'
+import Avatar from '../../components/Avatar'
 
 function ChatsPage() {
     const navigate = useNavigate()
@@ -91,7 +92,7 @@ function ChatsPage() {
                 {chats.length === 0 && <p className={styles.empty}>У вас пока нет чатов</p>}
                 {chats.map(chat => (
                     <div key={chat.chat_id} className={styles.chatItem} onClick={() => navigate(`/chats/${chat.chat_id}`)}>
-                        <div className={styles.avatar}>{chat.name?.[0]?.toUpperCase()}</div>
+                        <Avatar avatarUrl={chat.avatar_url} size={38}/>
                         <div className={styles.chatInfo}>
                             <div className={styles.chatName}>{chat.name}</div>
                             <div className={styles.lastMessage}>{chat.last_message || 'Нет сообщений'}</div>
@@ -100,16 +101,16 @@ function ChatsPage() {
                 ))}
             </div>
 
-            <h2 className={styles.usersTitle}>Начать переписку с другом</h2>
+            {/* <h2 className={styles.usersTitle}>Начать переписку с другом</h2>
             <div className={styles.usersList}>
                 {friends.length === 0 && <p className={styles.empty}>Добавьте друзей, чтобы начать переписку</p>}
                 {friends.map(friend => (
                     <div key={friend.id} className={styles.userItem} onClick={() => handleStartDirectChat(friend.id)}>
-                        <div className={styles.avatar}>{friend.first_name?.[0]}</div>
+                        <Avatar avatarUrl={friend.avatar_url} size={38}/>
                         <span>{friend.first_name} {friend.last_name}</span>
                     </div>
                 ))}
-            </div>
+            </div> */}
         </div>
     )
 }
