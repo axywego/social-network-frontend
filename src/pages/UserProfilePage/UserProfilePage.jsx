@@ -90,7 +90,12 @@ function UserProfilePage() {
 
     const handleMessage = async () => {
         try {
-            const chat = await chatService.createChat({ type: 'direct', user_if_direct: userId })
+            let chat = await chatService.getDirectChat(userId)
+            if (chat) {
+                navigate(`/chats/${chat.chat_id}`)
+                return
+            }
+            chat = await chatService.createChat({ type: 'direct', user_if_direct: userId })
             navigate(`/chats/${chat.chat_id}`)
         } catch (err) {
             if (err.response?.status === 400) {

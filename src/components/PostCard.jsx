@@ -4,7 +4,7 @@ import { postService } from '../services/postService'
 import styles from './PostCard.module.css'
 import Avatar from './Avatar'
 
-function PostCard({ post, author, usersById }) {
+function PostCard({ post, author }) {
     const navigate = useNavigate()
 
     const [liked, setLiked] = useState(post.liked_by_me)
@@ -41,7 +41,9 @@ function PostCard({ post, author, usersById }) {
 
         setSending(true)
         try {
-            const comment = await postService.createComment({ post_id: post.post_id, content: commentText.trim() })
+            console.log(`${post.id}: ${commentText.trim()}`)
+
+            const comment = await postService.createComment({ post_id: post.id, content: commentText.trim() })
             
             setComments(prev => [...prev, comment])
             setCommentText('')
@@ -53,23 +55,12 @@ function PostCard({ post, author, usersById }) {
         }
     }
 
-    const authorName = (userId) => {
-        const u = usersById?.[userId]
-        return u ? `${u.first_name} ${u.last_name}` : 'Пользователь'
-    }
-
-    const authorImage = (userId) => {
-        const u = usersById?.[userId]
-        console.log(u)
-        return u ? u.avatar_url : null
-    }
-
     return (
         <div className={styles.card}>
             <div className={styles.header} onClick={() => navigate(`/users/${author.id}`)}>
                 <Avatar avatarUrl={author?.avatar_url} size={38} />
                 <div>
-                    <div className={styles.author}>{author ? `${author.first_name} ${author.last_name}` : 'Пользователь'}</div>
+                    <div className={styles.author}>{`${author.first_name} ${author.last_name}`}</div>
                     <div className={styles.time}>
                         {new Date(post.created_at).toLocaleString('ru-RU', {
                             day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
@@ -105,17 +96,12 @@ function PostCard({ post, author, usersById }) {
                 <div className={styles.commentsSection}>
                     {comments.map((c, i) => (
                         <div key={i} className={styles.commentItem}>
-                            <Avatar avatarUrl={authorImage(c.user_id)} size={38} />
+                            <div style={{cursor: 'pointer'}} onClick={() => navigate(`/users/${c.author.id}`)}>
+                                <Avatar avatarUrl={c.author.avatar_url} size={38}/>
+                            </div>
                             <div className={styles.commentBody}>
-                                <span className={styles.commentAuthor}>{authorName(c.user_id)}</span>
-                                {c.content && <span className={styles.commentText}>{c.content}</span>}
-                                {c.image_url && (
-                                    <img
-                                        src={postService.resolveImageUrl(c.image_url)}
-                                        alt="comment attachment"
-                                        className={styles.commentImage}
-                                    />
-                                )}
+                                <span className={styles.commentAuthor}>{c.author.first_name} {c.author.last_name}</span>
+                                <span className={styles.commentText}>{c.content}</span>
                             </div>
                         </div>
                     ))}

@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { friendService } from '../../services/friendService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
 import styles from './FriendsPage.module.css'
+import Avatar from '../../components/Avatar'
 
 const TABS = { FRIENDS: 'friends', INCOMING: 'incoming', OUTGOING: 'outgoing', SEARCH: 'search' }
+const SEARCH_LIMIT = 20
 
 function FriendsPage() {
     const navigate = useNavigate()
@@ -15,10 +17,16 @@ function FriendsPage() {
     const [friends, setFriends] = useState([])
     const [incoming, setIncoming] = useState([])
     const [outgoing, setOutgoing] = useState([])
-    const [allUsers, setAllUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
     const [query, setQuery] = useState('')
+    const [searchResults, setSearchResults] = useState([])
+    const [searchTotal, setSearchTotal] = useState(0)
+    const [searchOffset, setSearchOffset] = useState(0)
+    const [searchLoading, setSearchLoading] = useState(false)
+
+    const abortRef = useRef(null)
 
     useEffect(() => {
         loadAll()
@@ -27,16 +35,14 @@ function FriendsPage() {
     const loadAll = async () => {
         try {
             setLoading(true)
-            const [friendsData, incomingData, outgoingData, usersData] = await Promise.all([
+            const [friendsData, incomingData, outgoingData] = await Promise.all([
                 friendService.getFriends(),
                 friendService.getIncomingRequests(),
-                friendService.getOutgoingRequests(),
-                userService.getUsers()
+                friendService.getOutgoingRequests()
             ])
             setFriends(friendsData)
             setIncoming(incomingData)
             setOutgoing(outgoingData)
-            setAllUsers(usersData)
         } catch (err) {
             setError('Не удалось загрузить друзей')
             console.error(err)
@@ -45,24 +51,53 @@ function FriendsPage() {
         }
     }
 
+    const runSearch = useCallback(async (q, offset) => {
+        if (abortRef.current) abortRef.current.abort()
+        const controller = new AbortController()
+        abortRef.current = controller
+
+        try {
+            setSearchLoading(true)
+            const { items, total } = await userService.searchUsers(q, {
+                limit: SEARCH_LIMIT,
+                offset,
+                signal: controller.signal
+            })
+            setSearchResults(prev => offset === 0 ? items : [...prev, ...items])
+            setSearchTotal(total)
+            setSearchOffset(offset)
+        } catch (err) {
+            if (err.name !== 'CanceledError' && err.name !== 'AbortError') {
+                console.error(err)
+            }
+        } finally {
+            setSearchLoading(false)
+        }
+    }, [])
+
+    // debounce поискового запроса
+    useEffect(() => {
+        if (!query.trim()) {
+            setSearchResults([])
+            setSearchTotal(0)
+            return
+        }
+        const timer = setTimeout(() => {
+            runSearch(query.trim(), 0)
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [query, runSearch])
+
+    const loadMoreResults = () => {
+        runSearch(query.trim(), searchOffset + SEARCH_LIMIT)
+    }
+
     const relationStatus = (userId) => {
         if (friends.some(f => f.id === userId)) return 'friends'
         if (incoming.some(r => r.user.id === userId)) return 'incoming'
         if (outgoing.some(r => r.user.id === userId)) return 'outgoing'
         return 'none'
     }
-
-    const searchResults = useMemo(() => {
-        if (!query.trim()) return []
-        const q = query.trim().toLowerCase()
-        return allUsers.filter(u =>
-            u.id !== currentUser?.id && (
-                u.username.toLowerCase().includes(q) ||
-                u.first_name.toLowerCase().includes(q) ||
-                u.last_name.toLowerCase().includes(q)
-            )
-        )
-    }, [query, allUsers, currentUser])
 
     const handleSendRequest = async (username) => {
         try {
@@ -157,7 +192,7 @@ function FriendsPage() {
 
             {activeTab === TABS.SEARCH && (
                 <div className={styles.list}>
-                    {searchResults.length === 0 && <p className={styles.empty}>Никого не найдено</p>}
+                    {!searchLoading && searchResults.length === 0 && <p className={styles.empty}>Никого не найдено</p>}
                     {searchResults.map(user => (
                         <div key={user.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${user.id}`)}>
@@ -170,6 +205,10 @@ function FriendsPage() {
                             {renderActionButton(user)}
                         </div>
                     ))}
+                    {searchLoading && <p className={styles.empty}>Ищем...</p>}
+                    {!searchLoading && searchResults.length < searchTotal && (
+                        <button className={styles.tab} onClick={loadMoreResults}>Показать ещё</button>
+                    )}
                 </div>
             )}
 
@@ -179,7 +218,7 @@ function FriendsPage() {
                     {friends.map(friend => (
                         <div key={friend.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${friend.id}`)}>
-                                <div className={styles.avatar}>{friend.first_name?.[0]}</div>
+                                <Avatar avatarUrl={friend.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{friend.first_name} {friend.last_name}</div>
                                     <div className={styles.username}>@{friend.username}</div>
@@ -197,7 +236,7 @@ function FriendsPage() {
                     {incoming.map(req => (
                         <div key={req.user.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${req.user.id}`)}>
-                                <div className={styles.avatar}>{req.user.first_name?.[0]}</div>
+                                <Avatar avatarUrl={req.user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
                                     <div className={styles.username}>@{req.user.username}</div>
@@ -218,7 +257,7 @@ function FriendsPage() {
                     {outgoing.map(req => (
                         <div key={req.user.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${req.user.id}`)}>
-                                <div className={styles.avatar}>{req.user.first_name?.[0]}</div>
+                                <Avatar avatarUrl={req.user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
                                     <div className={styles.username}>@{req.user.username}</div>

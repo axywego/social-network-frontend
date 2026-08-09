@@ -1,11 +1,6 @@
 import api from './api'
 
 export const userService = {
-    async getUsers() {
-        const { data } = await api.get('/users')
-        return data
-    },
-
     async getMyProfile() {
         const { data } = await api.get('/users/me')
         return data
@@ -13,6 +8,14 @@ export const userService = {
 
     async getUserById(userId) {
         const { data } = await api.get(`/users/${userId}`)
+        return data
+    },
+
+    async searchUsers(query, { limit = 20, offset = 0, signal } = {}) {
+        const { data } = await api.get('/users/search', {
+            params: { q: query, limit, offset },
+            signal
+        })
         return data
     },
 

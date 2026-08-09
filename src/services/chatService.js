@@ -14,6 +14,11 @@ export const chatService = {
         return data
     },
 
+    async getDirectChat(user_id) {
+        const { data } = await api.get(`/chats/${user_id}`)
+        return data
+    },
+
     async getMessages(chatId) {
         const { data } = await api.get(`/chats/${chatId}/messages`)
         return data

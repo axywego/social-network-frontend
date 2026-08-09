@@ -33,7 +33,7 @@ function PostComposer({ onPostCreated }) {
             console.log(post)
 
             if (imageFile) {
-                await postService.uploadPostImage(post.post_id, imageFile)
+                await postService.uploadPostImage(post.id, imageFile)
             }
 
             setText('')
