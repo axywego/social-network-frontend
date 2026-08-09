@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuthContext } from '../context/AuthContext'
 import Avatar from './Avatar'
@@ -5,9 +6,25 @@ import styles from './Header.module.css'
 
 function Header() {
     const { currentUser } = useAuthContext()
+    const headerRef = useRef(null)
+
+    useEffect(() => {
+        const el = headerRef.current
+        if (!el) return
+
+        const updateHeight = () => {
+            document.documentElement.style.setProperty('--header-height', `${el.offsetHeight}px`)
+        }
+
+        updateHeight()
+
+        const observer = new ResizeObserver(updateHeight)
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
 
     return (
-        <header className={styles.header}>
+        <header ref={headerRef} className={styles.header}>
             <div className={styles.inner}>
                 <NavLink to="/feed" className={styles.logo}>Coova</NavLink>
                 <nav className={styles.nav}>

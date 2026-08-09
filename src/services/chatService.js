@@ -1,4 +1,4 @@
-import api from './api'
+import api, { API_URL } from './api'
 
 export const chatService = {
     async getChats() {
@@ -14,6 +14,21 @@ export const chatService = {
 
     async getDirectChat(user_id) {
         const { data } = await api.get(`/chats/${user_id}`)
+        return data
+    },
+
+    async getChatMembers(chatId) {
+        const { data } = await api.get(`/chats/${chatId}/members`)
+        return data
+    },
+
+    async addUserToChat(chatId, userId) {
+        const { data } = await api.post('/chats/add_user', { chat_id: chatId, user_id: userId })
+        return data
+    },
+
+    async removeUserFromChat(chatId, userId) {
+        const { data } = await api.delete('/chats/remove_user', { data: { chat_id: chatId, user_id: userId } })
         return data
     },
 
@@ -40,5 +55,17 @@ export const chatService = {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
         return data
+    },
+
+    connectToChat(chatId, { onMessage }) {
+        const token = localStorage.getItem('accessToken')
+        const wsUrl = `${API_URL.replace(/^http/, 'ws')}/chats/ws/${chatId}?token=${token}`
+        const ws = new WebSocket(wsUrl)
+
+        ws.onmessage = (event) => {
+            onMessage(JSON.parse(event.data))
+        }
+
+        return ws
     }
 }
