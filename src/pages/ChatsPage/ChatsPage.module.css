@@ -166,3 +166,17 @@
     margin-bottom: 20px;
     font-size: 14px;
 }
+
+.unreadBadge {
+    background: #4a9eff;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+}

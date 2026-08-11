@@ -38,3 +38,11 @@
     padding: 40px;
     color: var(--color-ink-soft);
 }
+
+.sentinel {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}

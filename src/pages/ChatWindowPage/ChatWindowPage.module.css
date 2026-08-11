@@ -50,22 +50,35 @@
     color: var(--color-ink);
 }
 
-.messages {
+/* === Виртуозный скролл === */
+.messagesWrapper {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.messagesContent {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+}
+
+.loadingOlder {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-family: var(--font-body);
+    color: var(--color-ink-soft);
+    background: var(--color-surface);
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 2;
 }
 
 .messageRow {
     display: flex;
     justify-content: flex-start;
+    padding-bottom: 10px;
 }
 
 .messageRow.own {
@@ -276,4 +289,12 @@
 .memberAddBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.clickableTitle {
+    cursor: pointer;
+}
+
+.clickableTitle:hover {
+    text-decoration: underline;
 }

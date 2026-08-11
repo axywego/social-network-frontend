@@ -32,8 +32,10 @@ export const chatService = {
         return data
     },
 
-    async getMessages(chatId) {
-        const { data } = await api.get(`/chats/${chatId}/messages`)
+    async getMessages(chatId, {limit = 30, before} = {}) {
+        const params = new URLSearchParams({limit})
+        if (before) params.append('before', before)
+        const { data } = await api.get(`/chats/${chatId}/messages?${params}`)
         return data
     },
 
@@ -57,15 +59,28 @@ export const chatService = {
         return data
     },
 
-    connectToChat(chatId, { onMessage }) {
+    connectToChat(chatId, { onMessage, onRead, onOpen }) {
         const token = localStorage.getItem('accessToken')
         const wsUrl = `${API_URL.replace(/^http/, 'ws')}/chats/ws/${chatId}?token=${token}`
         const ws = new WebSocket(wsUrl)
 
+        ws.onopen = () => onOpen?.()
         ws.onmessage = (event) => {
-            onMessage(JSON.parse(event.data))
+            const data = JSON.parse(event.data)
+            if (data.type === 'message_read') {
+                onRead?.(data)
+            } else {
+                onMessage?.(data)
+            }
         }
 
-        return ws
+        return {
+            close: () => ws.close(),
+            markRead: (messageId) => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'read', message_id: messageId }))
+                }
+            }
+        }
     }
 }

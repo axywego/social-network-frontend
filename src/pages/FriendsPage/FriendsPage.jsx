@@ -196,7 +196,7 @@ function FriendsPage() {
                     {searchResults.map(user => (
                         <div key={user.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${user.id}`)}>
-                                <div className={styles.avatar}>{user.first_name?.[0]}</div>
+                                <Avatar avatarUrl={user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{user.first_name} {user.last_name}</div>
                                     <div className={styles.username}>@{user.username}</div>

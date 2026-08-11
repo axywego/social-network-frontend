@@ -3,8 +3,12 @@ import api from './api'
 const API_URL = import.meta.env.VITE_API_URL
 
 export const postService = {
-    async getFeed() {
-        const { data } = await api.get('/posts/recent')
+    async getFeed({limit = 15, before}) {
+        const params = new URLSearchParams({ limit })
+        if(before) {
+            params.append('before', before)
+        }
+        const { data } = await api.get(`/posts/recent?${params}`)
         return data
     },
 

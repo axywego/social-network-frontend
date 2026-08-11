@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
+import { useNotifications } from '../../context/NotificationContext'
 import styles from './ChatsPage.module.css'
 import Avatar from '../../components/Avatar'
 
@@ -14,15 +15,41 @@ function ChatsPage() {
     const [showCreateGroup, setShowCreateGroup] = useState(false)
     const [groupName, setGroupName] = useState('')
 
+    const { subscribe, getActiveChatId } = useNotifications()
+
     useEffect(() => {
         loadChats()
         friendService.getFriends().then(setFriends).catch(console.error)
     }, [])
 
+    useEffect(() => {
+        const unsubscribe = subscribe((notification) => {
+            if (notification.type !== 'new_message') return
+            const isViewingThisChat = notification.chat_id === getActiveChatId()
+
+            setChats(prev => {
+                const idx = prev.findIndex(c => c.chat_id === notification.chat_id)
+                if (idx === -1) return prev
+                const updated = {
+                    ...prev[idx],
+                    last_message: notification.message,
+                    last_message_time: notification.created_at,
+                    unread_count: isViewingThisChat ? prev[idx].unread_count : prev[idx].unread_count + 1,
+                }
+                const rest = prev.filter((_, i) => i !== idx)
+                return [updated, ...rest]
+            })
+        })
+        return unsubscribe
+    }, [subscribe, getActiveChatId])
+
     const loadChats = async () => {
         try {
             setLoading(true)
             const data = await chatService.getChats()
+            data.forEach(element => {
+                console.log(`${element.name}: ${element.unread_count}`)
+            });
             setChats(data)
         } catch (err) {
             setError('Не удалось загрузить чаты')
@@ -92,11 +119,14 @@ function ChatsPage() {
                 {chats.length === 0 && <p className={styles.empty}>У вас пока нет чатов</p>}
                 {chats.map(chat => (
                     <div key={chat.chat_id} className={styles.chatItem} onClick={() => navigate(`/chats/${chat.chat_id}`)}>
-                        <Avatar avatarUrl={chat.avatar_url} size={38}/>
+                        <Avatar avatarUrl={chat.avatar_url} size={40} />
                         <div className={styles.chatInfo}>
                             <div className={styles.chatName}>{chat.name}</div>
-                            <div className={styles.lastMessage}>{chat.last_message || 'Нет сообщений'}</div>
+                            <div className={styles.lastMessage}>{chat.last_message}</div>
                         </div>
+                        {chat.unread_count > 0 && (
+                            <span className={styles.unreadBadge}>{chat.unread_count}</span>
+                        )}
                     </div>
                 ))}
             </div>
