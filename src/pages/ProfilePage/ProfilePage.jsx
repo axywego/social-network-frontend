@@ -5,6 +5,7 @@ import { authService } from '../../services/authService'
 import { userService } from '../../services/userService'
 import { postService } from '../../services/postService'
 import { useAuthContext } from '../../context/AuthContext'
+import { PostActionsProvider } from '../../context/PostActionsContext'
 import PostCard from '../../components/PostCard'
 import PostComposer from '../../components/PostComposer'
 import styles from './ProfilePage.module.css'
@@ -99,6 +100,25 @@ function ProfilePage() {
         }
     }
 
+    const handleEditPost = (post) => {
+        // фичи еще нет!!!
+    }
+
+    const handleDeletePost = async (post) => {
+        if (!window.confirm('Удалить пост?')) return
+
+        const prevPosts = posts
+        setPosts(prev => prev.filter(p => p.id !== post.id))
+
+        try {
+            await postService.deletePost(post.id)
+        } catch (err) {
+            console.error(err)
+            setPosts(prevPosts)
+            setError('Не удалось удалить пост')
+        }
+    }
+
     if (!currentUser || loading) {
         return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
     }
@@ -114,15 +134,6 @@ function ProfilePage() {
 
             <div className={styles.myProfile}>
                 <div className={styles.avatarLarge} onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
-                    {/* {currentUser.avatar_url ? (
-                        <img
-                            src={`http://127.0.0.1:8000${currentUser.avatar_url}`}
-                            alt="avatar"
-                            style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <>{currentUser.first_name?.[0]}{currentUser.last_name?.[0]}</>
-                    )} */}
                     <Avatar avatarUrl={currentUser.avatar_url} size={100} />
                     {uploading && <div className={styles.uploadOverlay}>...</div>}
                 </div>
@@ -159,13 +170,15 @@ function ProfilePage() {
             <h2 className={styles.postsTitle}>Мои посты</h2>
             <div className={styles.feed}>
                 {posts.length === 0 && <p className={styles.empty}>У вас пока нет постов</p>}
-                {posts.map(post => (
-                    <PostCard
-                        post={post}
-                        author={currentUser}
-                        usersById={{ [currentUser.id]: currentUser, me: currentUser }}
-                    />
-                ))}
+                <PostActionsProvider onEdit={handleEditPost} onDelete={handleDeletePost}>
+                    {posts.map(post => (
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            author={currentUser}
+                        />
+                    ))}
+                </PostActionsProvider>
             </div>
         </div>
     )

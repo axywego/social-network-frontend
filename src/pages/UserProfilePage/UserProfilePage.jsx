@@ -5,6 +5,7 @@ import { postService } from '../../services/postService'
 import { friendService } from '../../services/friendService'
 import { chatService } from '../../services/chatService'
 import { useAuthContext } from '../../context/AuthContext'
+import { PostActionsProvider } from '../../context/PostActionsContext'
 import PostCard from '../../components/PostCard'
 import styles from './UserProfilePage.module.css'
 import Avatar from '../../components/Avatar'
@@ -115,6 +116,15 @@ function UserProfilePage() {
         }
     }
 
+    const handleReportPost = async (post) => {
+        try {
+            await postService.reportPost(post.id)
+        } catch (err) {
+            console.error(err)
+            setError('Не удалось отправить жалобу')
+        }
+    }
+
     if (loading) {
         return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
     }
@@ -161,13 +171,15 @@ function UserProfilePage() {
             <h2 className={styles.postsTitle}>Посты</h2>
             <div className={styles.feed}>
                 {posts.length === 0 && <p className={styles.empty}>Пока нет постов</p>}
-                {posts.map(post => (
-                    <PostCard
-                        post={post}
-                        author={profile}
-                        usersById={{ [profile.id]: profile, me: currentUser, [currentUser.id]: currentUser }}
-                    />
-                ))}
+                <PostActionsProvider onReport={handleReportPost}>
+                    {posts.map(post => (
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            author={profile}
+                        />
+                    ))}
+                </PostActionsProvider>
             </div>
         </div>
     )

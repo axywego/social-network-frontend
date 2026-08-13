@@ -27,6 +27,11 @@ export const postService = {
         return data
     },
 
+    async deletePost(postId) {
+        const { data } = await api.delete(`/posts/${postId}/delete`)
+        return data
+    },
+
     async uploadPostImage(postId, file) {
         const formData = new FormData()
         formData.append('file', file)
