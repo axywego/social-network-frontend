@@ -5,6 +5,7 @@ import { useAuthContext } from '../context/AuthContext'
 import { usePostActions } from '../context/PostActionsContext'
 import styles from './PostCard.module.css'
 import Avatar from './Avatar'
+import ImageZoomModal from './ImageZoomModal'
 
 function PostCard({ post, author }) {
     const navigate = useNavigate()
@@ -21,6 +22,8 @@ function PostCard({ post, author }) {
     const [showComments, setShowComments] = useState(false)
     const [commentText, setCommentText] = useState('')
     const [sending, setSending] = useState(false)
+
+    const [isZoomOpen, setIsZoomOpen] = useState(false)
 
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef(null)
@@ -171,14 +174,17 @@ function PostCard({ post, author }) {
             </div>
 
             {post.content && <div className={styles.content}>{post.content}</div>}
-
-            {post.image_url && (
-                <img
-                    src={postService.resolveImageUrl(post.image_url)}
-                    alt="post attachment"
-                    className={styles.image}
-                />
-            )}
+            <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                {post.image_url && (
+                    <img
+                        src={postService.resolveImageUrl(post.image_url)}
+                        alt="post attachment"
+                        className={styles.image}
+                        style= {{cursor: 'zoom-in'}}
+                        onClick={() => setIsZoomOpen(true)}
+                    />
+                )}
+            </div>            
 
             <div className={styles.actions}>
                 <button
@@ -219,6 +225,12 @@ function PostCard({ post, author }) {
                         </button>
                     </form>
                 </div>
+            )}
+            {isZoomOpen && post.image_url && (
+                <ImageZoomModal
+                    src={postService.resolveImageUrl(post.image_url)}
+                    onClose={() => setIsZoomOpen(false)}
+                />
             )}
         </div>
     )

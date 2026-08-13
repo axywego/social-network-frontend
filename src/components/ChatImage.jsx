@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { chatService } from '../services/chatService'
+import ImageZoomModal from './ImageZoomModal'
 
 function ChatImage({ imageUrl, className, width, height }) {
     const [blobUrl, setBlobUrl] = useState(null)
+
+    const [isZoomOpen, setIsZoomOpen] = useState(false)
 
     const displaySize = useMemo(() => {
         if (!width || !height) {
@@ -62,8 +65,16 @@ function ChatImage({ imageUrl, className, width, height }) {
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        display: 'block'
+                        display: 'block',
+                        cursor: 'zoom-in'
                     }}
+                    onClick={() => setIsZoomOpen(true)}
+                />
+            )}
+            {isZoomOpen && (
+                <ImageZoomModal
+                    src={blobUrl}
+                    onClose={() => setIsZoomOpen(false)}
                 />
             )}
         </div>
