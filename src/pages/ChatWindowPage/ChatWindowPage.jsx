@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { chatService } from '../../services/chatService'
@@ -18,7 +18,7 @@ function MessageBubble({ message, isOwn }) {
     return (
         <div className={`${styles.messageRow} ${isOwn ? styles.own : ''}`}>
             <div className={styles.bubble}>
-                {message.image_url && <ChatImage imageUrl={message.image_url} className={styles.image} />}
+                {message.image_url && <ChatImage imageUrl={message.image_url} className={styles.image} width={message.image_width} height={message.image_height} />}
                 {message.content && <div className={styles.text}>{message.content}</div>}
                 <div className={styles.time}>
                     {new Date(message.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
@@ -35,8 +35,9 @@ function ChatWindowPage() {
 
     const [chatName, setChatName] = useState('')
     const [chatType, setChatType] = useState(null)
-    const [messages, setMessages] = useState([])
-    const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX)
+    // const [messages, setMessages] = useState([])
+    // const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX)
+    const [listState, setListState] = useState({ messages: [], firstItemIndex: START_INDEX })
     const [text, setText] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -53,7 +54,7 @@ function ChatWindowPage() {
     // Всегда содержит актуальный массив сообщений — чтобы не тащить messages
     // в зависимости колбэков (startReached и т.п. не должны пересоздаваться каждый рендер)
     const messagesStateRef = useRef([])
-    messagesStateRef.current = messages
+    messagesStateRef.current = listState.messages
 
     const loadingOlderRef = useRef(false)
     const hasMoreOlderRef = useRef(true)
@@ -86,7 +87,10 @@ function ChatWindowPage() {
                 if (isOwn || atBottomRef.current) {
                     forceFollowRef.current = true
                 }
-                setMessages(prev => [...prev, message])
+                setListState(prev => ({
+                    ...prev,
+                    messages: [...prev.messages, message],
+                }))
                 if (!isOwn && atBottomRef.current) {
                     conn.markRead(message.id)
                 }
@@ -120,8 +124,7 @@ function ChatWindowPage() {
             setChatName(chat?.name || 'Чат')
             setChatType(chat?.type || null)
 
-            setMessages(msgs)
-            setFirstItemIndex(START_INDEX)
+            setListState({ messages: msgs, firstItemIndex: START_INDEX })
             setHasMoreOlder(msgs.length === PAGE_SIZE)
             hasMoreOlderRef.current = msgs.length === PAGE_SIZE
 
@@ -150,35 +153,22 @@ function ChatWindowPage() {
     const loadOlderMessages = useCallback(async () => {
         if (loadingOlderRef.current || !hasMoreOlderRef.current) return
 
-        const oldest = messagesStateRef.current[0]
-        if (!oldest) return
-
         loadingOlderRef.current = true
-        setLoadingOlder(true)
 
         try {
+            const oldest = messagesStateRef.current[0]
+
             const older = await chatService.getMessages(chatId, {
                 limit: PAGE_SIZE,
                 before: oldest.created_at,
             })
 
-            const stillHasMore = older.length === PAGE_SIZE
-            setHasMoreOlder(stillHasMore)
-            hasMoreOlderRef.current = stillHasMore
-
-            if (older.length > 0) {
-                // Сдвигаем "виртуальный" индекс первого элемента — именно это
-                // говорит Virtuoso "сохрани позицию скролла относительно
-                // конкретных сообщений", а не относительно пикселей.
-                // Поэтому ручной пересчёт scrollTop больше не нужен вообще.
-                setFirstItemIndex(prev => prev - older.length)
-                setMessages(prev => [...older, ...prev])
-            }
-        } catch (err) {
-            console.error(err)
+            setListState(prev => ({
+                firstItemIndex: prev.firstItemIndex - older.length,
+                messages: [...older, ...prev.messages],
+            }))
         } finally {
             loadingOlderRef.current = false
-            setLoadingOlder(false)
         }
     }, [chatId])
 
@@ -259,8 +249,8 @@ function ChatWindowPage() {
 
         setUploading(true)
         try {
-            const { filename } = await chatService.uploadChatImage(chatId, file)
-            await chatService.sendMessage(chatId, { image_url: filename })
+            const { filename, width, height } = await chatService.uploadChatImage(chatId, file)
+            await chatService.sendMessage(chatId, { image_url: filename, image_width: width, image_height: height })
         } catch (err) {
             console.error(err)
             setError('Не удалось отправить изображение')
@@ -351,9 +341,6 @@ function ChatWindowPage() {
             )}
 
             <div className={styles.messagesWrapper}>
-                {loadingOlder && (
-                    <div className={styles.loadingOlder}>Загрузка сообщений...</div>
-                )}
                 <Virtuoso
                     // key={chatId} форсит полный ремаунт списка при смене чата —
                     // так внутреннее состояние скролла/индексов Virtuoso не "утекает"
@@ -362,12 +349,18 @@ function ChatWindowPage() {
                     ref={virtuosoRef}
                     className={styles.messages}
                     style={{ height: '100%' }}
-                    data={messages}
-                    firstItemIndex={firstItemIndex}
-                    initialTopMostItemIndex={messages.length - 1}
-                    alignToBottom
+                    data={listState.messages}
+                    firstItemIndex={listState.firstItemIndex}
+                    initialTopMostItemIndex={
+                        START_INDEX + listState.messages.length - 1
+                    }
+                    computeItemKey={(index, message) => message.id}
+                    // alignToBottom
                     startReached={loadOlderMessages}
                     followOutput={followOutput}
+                    // Без этого ResizeObserver может давать визуальный рывок при prepend старых сообщений
+                    // из-за отложенного пересчёта viewport.
+                    skipAnimationFrameInResizeObserver
                     atBottomStateChange={(atBottom) => {
                         atBottomRef.current = atBottom
                         if (atBottom) {
@@ -377,7 +370,23 @@ function ChatWindowPage() {
                     }}
                     increaseViewportBy={{ top: 400, bottom: 200 }}
                     components={{
-                        Header: () => <div style={{ height: 12 }} />,
+                        // Индикатор подгрузки теперь часть Header, а не внешний сосед
+                        // над Virtuoso: так он не меняет высоту контейнера списка
+                        // (это и дёргало скролл при prepend старых сообщений).
+                        Header: () => (
+                            // Высота фиксирована всегда (см. .headerSpacer в CSS,
+                            // например min-height: 32px) — меняется только
+                            // видимость текста, а не сама высота блока,
+                            // иначе прыжок просто переместится сюда.
+                            <div className={styles.headerSpacer}>
+                                <div
+                                    className={styles.loadingOlder}
+                                    style={{ visibility: loadingOlder ? 'visible' : 'hidden' }}
+                                >
+                                    Загрузка сообщений...
+                                </div>
+                            </div>
+                        ),
                         Footer: () => <div style={{ height: 12 }} />,
                     }}
                     itemContent={(index, message) => (

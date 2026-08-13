@@ -298,3 +298,10 @@
 .clickableTitle:hover {
     text-decoration: underline;
 }
+
+.headerSpacer {
+    min-height: 32px; /* высота ряда с текстом загрузки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
