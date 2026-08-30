@@ -1,0 +1,326 @@
+.container {
+    position: fixed;
+    top: var(--header-height, 60px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--color-canvas);
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+    flex-shrink: 0;
+}
+
+.header h2 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 0;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.backBtn:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+}
+
+/* === Виртуозный скролл === */
+.messagesWrapper {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.loadingOlder {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-family: var(--font-body);
+    color: var(--color-ink-soft);
+    background: var(--color-surface);
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.messageRow {
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+}
+
+.messageRow.own {
+    justify-content: flex-end;
+}
+
+.bubble {
+    margin-right: 10px;
+    margin-left: 10px;
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+}
+
+.own .bubble {
+    background: var(--color-moss);
+    border-color: var(--color-moss);
+    color: white;
+}
+
+.image {
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 14.5px;
+    line-height: 1.45;
+}
+
+.time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.inputBar {
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-line);
+    flex-shrink: 0;
+}
+
+.attachBtn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.attachBtn:hover {
+    background: var(--color-line-soft);
+}
+
+.textInput {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-family: var(--font-body);
+    background: var(--color-surface-alt);
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.textInput:focus {
+    border-color: var(--color-moss);
+}
+
+.sendBtn {
+    padding: 10px 20px;
+    background: var(--color-moss);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.sendBtn:hover {
+    background: var(--color-moss-deep);
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-ink-soft);
+}
+
+.error {
+    color: var(--color-danger);
+}
+
+.membersBtn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--color-line);
+    color: var(--color-ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    padding: 7px 14px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.membersBtn:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+}
+
+.membersPanel {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.membersSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.membersSectionTitle {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+}
+
+.memberItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+}
+
+.memberName {
+    flex: 1;
+    font-size: 14px;
+    color: var(--color-ink);
+}
+
+.memberRemoveBtn {
+    padding: 6px 14px;
+    background: var(--color-danger-tint);
+    color: var(--color-danger);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.memberRemoveBtn:hover:not(:disabled) {
+    background: #ECD3CB;
+}
+
+.memberRemoveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.memberAddBtn {
+    padding: 6px 14px;
+    background: var(--color-moss);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.memberAddBtn:hover:not(:disabled) {
+    background: var(--color-moss-deep);
+}
+
+.memberAddBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clickableTitle {
+    cursor: pointer;
+}
+
+.clickableTitle:hover {
+    text-decoration: underline;
+}
+
+.headerSpacer {
+    min-height: 32px; /* высота ряда с текстом загрузки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sendBtnText {
+    display: inline;
+}
+
+.sendBtnIcon {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .sendBtnText {
+        display: none;
+    }
+    .sendBtnIcon {
+        display: inline;
+    }
+}

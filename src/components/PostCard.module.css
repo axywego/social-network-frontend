@@ -1,0 +1,313 @@
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 16px;
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.header > div[style] {
+    cursor: pointer;
+}
+
+.header img {
+    display: block;
+}
+
+.author {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--color-ink);
+}
+
+.time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-ink-faint);
+    letter-spacing: 0.01em;
+}
+
+.menuWrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.menuTrigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-ink-soft);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 1px;
+    padding: 6px 10px;
+    border-radius: var(--radius-full);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.menuTrigger:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+}
+
+.menuDropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 10;
+}
+
+.menuItem,
+.menuItemDanger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s ease;
+}
+
+.menuItem:hover {
+    background: var(--color-line-soft);
+}
+
+.menuItemDanger {
+    color: #d64545;
+}
+
+.menuItemDanger:hover {
+    background: rgba(214, 69, 69, 0.1);
+}
+
+.content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--color-ink);
+    font-size: 15px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+
+.image {
+    max-width: 100%;
+    max-height: 520px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 14px;
+    border: 1px solid var(--color-line);
+}
+
+.actions {
+    display: flex;
+    gap: 6px;
+    border-top: 1px solid var(--color-line-soft);
+    padding-top: 10px;
+}
+
+.likeBtn,
+.likeBtnActive,
+.commentBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--color-ink-soft);
+    padding: 7px 12px;
+    border-radius: var(--radius-full);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.likeBtn:hover,
+.commentBtn:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+}
+
+.likeBtnActive {
+    color: var(--color-plum);
+    background: var(--color-plum-tint);
+}
+
+.likeBtnActive:hover {
+    background: var(--color-plum-tint);
+}
+
+.commentsSection {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-line-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.commentItem {
+    display: flex;
+    gap: 10px;
+    position: relative;
+}
+
+.commentItem::before {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 38px;
+    bottom: -14px;
+    width: 1px;
+    background: var(--color-line);
+}
+
+.commentItem:last-child::before {
+    display: none;
+}
+
+.commentBody {
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-line-soft);
+    border-radius: var(--radius-md);
+    border-top-left-radius: 4px;
+    padding: 8px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.commentAuthor {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--color-ink);
+}
+
+.commentText {
+    font-size: 14px;
+    color: var(--color-ink);
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.commentImage {
+    max-width: 160px;
+    border-radius: var(--radius-sm);
+    margin-top: 4px;
+    border: 1px solid var(--color-line);
+}
+
+.commentForm {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: 46px;
+}
+
+.commentForm input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-family: var(--font-body);
+    background: var(--color-surface-alt);
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.commentForm input:focus {
+    border-color: var(--color-moss);
+}
+
+.commentForm button {
+    padding: 9px 18px;
+    background: var(--color-moss);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: background 0.15s ease;
+}
+
+.commentForm button:hover:not(:disabled) {
+    background: var(--color-moss-deep);
+}
+
+.commentForm button:disabled {
+    background: var(--color-ink-faint);
+    cursor: not-allowed;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.editTextarea {
+    resize: vertical;
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.editActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.editActions button {
+    padding: 9px 18px;
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: background 0.15s ease;
+}
+
+.sendBtnIcon {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .sendBtnText {
+        display: none;
+    }
+    .sendBtnIcon {
+        display: inline;
+    }
+}

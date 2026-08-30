@@ -1,0 +1,113 @@
+.postForm {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 24px;
+}
+
+.postForm textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    outline: none;
+    padding: 4px 0;
+    line-height: 1.5;
+}
+
+.postForm textarea::placeholder {
+    color: var(--color-ink-faint);
+}
+
+.previewWrap {
+    position: relative;
+    margin-top: 12px;
+    display: inline-block;
+}
+
+.preview {
+    max-width: 220px;
+    max-height: 220px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--color-line);
+    display: block;
+}
+
+.removePreview {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(34, 38, 31, 0.65);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    backdrop-filter: blur(2px);
+    transition: background 0.15s ease;
+}
+
+.removePreview:hover {
+    background: rgba(34, 38, 31, 0.85);
+}
+
+.formActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    border-top: 1px solid var(--color-line-soft);
+    padding-top: 14px;
+}
+
+.attachBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--color-ink-soft);
+    padding: 7px 12px;
+    border-radius: var(--radius-full);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.attachBtn:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+}
+
+.postBtn {
+    padding: 9px 22px;
+    background: var(--color-moss);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.postBtn:hover:not(:disabled) {
+    background: var(--color-moss-deep);
+}
+
+.postBtn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.postBtn:disabled {
+    background: var(--color-ink-faint);
+    cursor: not-allowed;
+}

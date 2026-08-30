@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --color-canvas: #F1F0EA;
+    --color-surface: #FFFFFF;
+    --color-surface-alt: #FAF9F4;
+    --color-ink: #22261F;
+    --color-ink-soft: #666C5F;
+    --color-ink-faint: #9B9F92;
+    --color-moss: #3F6B4A;
+    --color-moss-deep: #2E4F37;
+    --color-moss-tint: #E7EFE7;
+    --color-plum: #A6435A;
+    --color-plum-tint: #F5E6E9;
+    --color-danger: #B3402E;
+    --color-danger-tint: #F5E2DC;
+    --color-line: #E3E0D6;
+    --color-line-soft: #EDEBE2;
+
+    --font-display: 'Unbounded', system-ui, sans-serif;
+    --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-full: 999px;
+
+    --shadow-card: 0 1px 2px rgba(34, 38, 31, 0.04), 0 8px 24px -12px rgba(34, 38, 31, 0.12);
+    --shadow-pop: 0 12px 32px -8px rgba(34, 38, 31, 0.22);
+}
+
+body {
+    background: var(--color-canvas);
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+}
