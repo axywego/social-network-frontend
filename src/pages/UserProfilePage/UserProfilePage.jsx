@@ -53,8 +53,8 @@ function UserProfilePage() {
             setPosts(postsData)
 
             if (friends.some(f => f.id === currentUser.id)) setRelation('friends')
-            else if (incoming.some(r => r.user.id === currentUser.id)) setRelation('incoming')
-            else if (outgoing.some(r => r.user.id === currentUser.id)) setRelation('outgoing')
+            else if (incoming.some(r => r.user.id === userId)) setRelation('incoming')
+            else if (outgoing.some(r => r.user.id === userId)) setRelation('outgoing')
             else setRelation('none')
         } catch (err) {
             setError('Не удалось загрузить профиль')
@@ -94,7 +94,7 @@ function UserProfilePage() {
     const handleRemoveFriend = async () => {
         try {
             await friendService.removeFriend(profile.username)
-            setRelation('none')
+            setRelation('incoming')
         } catch (err) {
             console.error(err)
         }

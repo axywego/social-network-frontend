@@ -15,8 +15,15 @@ function PostCard({ post, author }) {
     const isEditing = post.id === editingPostId
 
     const [editText, setEditText] = useState(post.content || '')
-    const [editImage, setEditImage] = useState(post.image_url || '')
+    // Изображение, прикреплённое к редактируемому посту. filename — то, что уйдёт
+    // в image_url при сохранении: существующий путь (если не трогали), новый путь
+    // (если заменили) или null (если убрали). Пока не сохранили — на сам пост
+    // это никак не влияет.
+    const [pendingImage, setPendingImage] = useState(
+        post.image_url ? { filename: post.image_url, previewUrl: postService.resolveImageUrl(post.image_url), uploading: false } : null
+    )
     const [editSaving, setEditSaving] = useState(false)
+    const editFileInputRef = useRef(null)
 
     const isOwner = currentUser?.id === author?.id
 
@@ -35,8 +42,15 @@ function PostCard({ post, author }) {
     const menuRef = useRef(null)
 
     useEffect(() => {
-        if (isEditing) setEditText(post.content || '')
-    }, [isEditing, post.content])
+        if (!isEditing) return
+        setEditText(post.content || '')
+        setPendingImage(
+            post.image_url
+                ? { filename: post.image_url, previewUrl: postService.resolveImageUrl(post.image_url), uploading: false }
+                : null
+        )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditing, post.content, post.image_url])
 
     useEffect(() => {
         if (!menuOpen) return
@@ -86,7 +100,7 @@ function PostCard({ post, author }) {
             console.log(`${post.id}: ${commentText.trim()}`)
 
             const comment = await postService.createComment({ post_id: post.id, content: commentText.trim() })
-            
+
             setComments(prev => [...prev, comment])
             setCommentText('')
             setShowComments(true)
@@ -104,15 +118,53 @@ function PostCard({ post, author }) {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault()
-        if (!editText.trim() || editSaving) return
+        if (editSaving || pendingImage?.uploading) return
+        const trimmedText = editText.trim()
+        if (!trimmedText && !pendingImage) return // нечего сохранять — ни текста, ни фото
+
         setEditSaving(true)
-        await onSaveEdit(post.id, editText.trim(), editImage)
-        setEditSaving(false)
+        try {
+            await onSaveEdit(post.id, trimmedText, pendingImage ? pendingImage.filename : null)
+        } finally {
+            setEditSaving(false)
+        }
     }
 
     const handleEditCancel = () => {
         setEditText(post.content || '')
+        if (pendingImage?.previewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingImage.previewUrl)
+        setPendingImage(
+            post.image_url
+                ? { filename: post.image_url, previewUrl: postService.resolveImageUrl(post.image_url), uploading: false }
+                : null
+        )
         onCancelEdit()
+    }
+
+    const handleRemoveEditImage = () => {
+        if (pendingImage?.previewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingImage.previewUrl)
+        setPendingImage(null)
+    }
+
+    const handleEditImageChange = async (e) => {
+        const file = e.target.files[0]
+        e.target.value = '' // чтобы можно было выбрать тот же файл повторно
+        if (!file) return
+
+        if (pendingImage?.previewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingImage.previewUrl)
+        const previewUrl = URL.createObjectURL(file)
+        setPendingImage({ filename: null, previewUrl, uploading: true })
+
+        try {
+            const { filename } = await postService.uploadPostImage(post.id, file)
+            setPendingImage(prev =>
+                // если юзер уже убрал/сменил картинку, пока эта грузилась — не воскрешаем её
+                prev && prev.previewUrl === previewUrl ? { ...prev, filename, uploading: false } : prev
+            )
+        } catch (err) {
+            console.error(err)
+            setPendingImage(prev => (prev?.previewUrl === previewUrl ? null : prev))
+        }
     }
 
     const handleDeleteClick = () => {
@@ -127,15 +179,15 @@ function PostCard({ post, author }) {
 
     const getDate = (date) => {
         const today = new Date()
-        if (date.getFullYear() === today.getFullYear() && 
-            date.getMonth() === today.getMonth() && 
+        if (date.getFullYear() === today.getFullYear() &&
+            date.getMonth() === today.getMonth() &&
             date.getDate() === today.getDate()
         ) {
             return `Сегодня, ${date.toLocaleString('ru-RU', {hour: '2-digit', minute: '2-digit'})}`
         }
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-        
+
         if (
             date.getFullYear() === yesterday.getFullYear() &&
             date.getMonth() === yesterday.getMonth() &&
@@ -143,7 +195,7 @@ function PostCard({ post, author }) {
         ) {
             return `Вчера, ${date.toLocaleString('ru-RU', {hour: '2-digit', minute: '2-digit'})}`
         }
-        
+
         return date.toLocaleString('ru-RU', {
             day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
         })
@@ -208,29 +260,74 @@ function PostCard({ post, author }) {
                             if (e.key === 'Escape') handleEditCancel()
                         }}
                     />
-                    <div className={styles.editActions}>
-                        <button style={{backgroundColor: "#d64545"}} type="button" onClick={handleEditCancel} disabled={editSaving}>
-                            Отмена
+
+                    {pendingImage && (
+                        <div className={styles.editImagePreviewWrap}>
+                            <img
+                                src={pendingImage.previewUrl}
+                                alt=""
+                                className={styles.editImagePreview}
+                            />
+                            {pendingImage.uploading && (
+                                <div className={styles.editImageOverlay}>Загрузка...</div>
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleRemoveEditImage}
+                                title="Убрать изображение"
+                                className={styles.editImageRemoveBtn}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
+                    <div className={styles.editActionsRow}>
+                        <button
+                            type="button"
+                            onClick={() => editFileInputRef.current?.click()}
+                            disabled={editSaving}
+                            className={styles.editAttachBtn}
+                        >
+                            📎 {pendingImage ? 'Заменить фото' : 'Добавить фото'}
                         </button>
-                        <button style={{backgroundColor: "#3f6b4a"}} type="submit" disabled={editSaving || !editText.trim()}>
-                            {editSaving ? 'Сохранение...' : 'Сохранить'}
-                        </button>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={editFileInputRef}
+                            onChange={handleEditImageChange}
+                            style={{ display: 'none' }}
+                        />
+                        <div className={styles.editActions}>
+                            <button style={{backgroundColor: "#d64545"}} type="button" onClick={handleEditCancel} disabled={editSaving}>
+                                Отмена
+                            </button>
+                            <button
+                                style={{backgroundColor: "#3f6b4a"}}
+                                type="submit"
+                                disabled={editSaving || pendingImage?.uploading || (!editText.trim() && !pendingImage)}
+                            >
+                                {editSaving ? 'Сохранение...' : 'Сохранить'}
+                            </button>
+                        </div>
                     </div>
                 </form>
             ) : (
                 post.content && <div className={styles.content}>{post.content}</div>
             )}
-            <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                {post.image_url && (
-                    <img
-                        src={postService.resolveImageUrl(post.image_url)}
-                        alt="post attachment"
-                        className={styles.image}
-                        style={{ cursor: 'zoom-in' }}
-                        onClick={() => setIsZoomOpen(true)}
-                    />
-                )}
-            </div>        
+            {!isEditing && (
+                <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                    {post.image_url && (
+                        <img
+                            src={postService.resolveImageUrl(post.image_url)}
+                            alt="post attachment"
+                            className={styles.image}
+                            style={{ cursor: 'zoom-in' }}
+                            onClick={() => setIsZoomOpen(true)}
+                        />
+                    )}
+                </div>
+            )}
 
             <div className={styles.actions}>
                 <button

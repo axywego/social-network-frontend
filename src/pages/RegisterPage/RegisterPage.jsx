@@ -55,33 +55,22 @@ function RegisterPage() {
             birthday: formData.birthday || null
         }
 
-        if (!(/^[a-zA-Z]+$/.test(dataToSend.username))) {
-            setError('Имя пользователя не может содержать кириллицу!')
+        // Имя пользователя - только латиница, 5-14 символов
+        if (!/^[a-zA-Z]{5,14}$/.test(dataToSend.username)) {
+            setError('Имя пользователя должно содержать только латиницу (5-14 символов)!')
             setLoading(false)
             return
         }
 
-
-        if (dataToSend.username.includes(' ')){
-            setError('Имя пользователя не может иметь пробелы!')
-            setLoading(false)
-            return
-        }
-
-        if (dataToSend.username.length < 5 && dataToSend.username.length > 14){
-            setError('Имя пользователя не может быть меньше 5 и больше 14 символов!')
-            setLoading(false)
-            return
-        }
-
-        if (!(/^[a-zA-Z0-9@!;:_\-.]+$/.test(dataToSend.password))){
-            setError("Пароль должен содержать только латиницу, цифры и спец. символы: '@', '!', ';', ':', '_', '-' и '.'")
+        // Пароль - любые символы, кроме пробелов, минимум 8 символов
+        if (/\s/.test(dataToSend.password)) {
+            setError('Пароль не может содержать пробелы!')
             setLoading(false)
             return
         }
 
         if (dataToSend.password.length < 8) {
-            setError('Слишком короткий пароль! Минимум 8 символов')
+            setError('Пароль должен быть не менее 8 символов!')
             setLoading(false)
             return
         }
