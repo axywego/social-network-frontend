@@ -175,10 +175,12 @@ function FriendsPage() {
     const handleRemoveFriend = async (username) => {
         try {
             await friendService.removeFriend(username)
+
             setMyFriends(prev => prev.filter(f => f.username !== username))
             if (isOwnPage) {
                 setDisplayedFriends(prev => prev.filter(f => f.username !== username))
             }
+            setIncoming(await friendService.getIncomingRequests())
         } catch (err) {
             console.error(err)
         }

@@ -15,12 +15,13 @@ export default function PostModeration({ posts, setPosts, children }) {
 
     const handleSaveEdit = async (postId, newContent, newImageUrl) => {
         const prevPosts = posts
-
-        setPosts(prev => prev.map(p => (p.id === postId ? { ...p, content: newContent } : p)))
+        setPosts(prev => prev.map(p => (
+            p.id === postId ? { ...p, content: newContent, image_url: newImageUrl } : p
+        )))
         setEditingPostId(null)
-
         try {
-            await postService.updatePost(postId, { content: newContent, image_url: newImageUrl })
+            const updated = await postService.updatePost(postId, { content: newContent, image_url: newImageUrl })
+            setPosts(prev => prev.map(p => (p.id === postId ? updated : p)))
         } catch (err) {
             console.error(err)
             setPosts(prevPosts)

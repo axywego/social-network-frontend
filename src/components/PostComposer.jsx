@@ -28,13 +28,13 @@ function PostComposer({ onPostCreated }) {
 
         setPosting(true)
         try {
-            const post = await postService.createPost({ content: text.trim() || null, image_url: imageFile ? "image" : "" })
-
-            console.log(post)
-
+            let imageUrl = null
             if (imageFile) {
-                await postService.uploadPostImage(post.id, imageFile)
+                const { filename } = await postService.uploadImage(imageFile)
+                imageUrl = filename
             }
+
+            await postService.createPost({ content: text.trim() || null, image_url: imageUrl })
 
             setText('')
             handleRemoveImage()

@@ -19,6 +19,7 @@ export const postService = {
 
     async getPostCount(userId) {
         const { data } = await api.get(`/posts/count/${userId}`)
+        return data
     },
 
     async getUserPosts(userId) {
@@ -31,10 +32,10 @@ export const postService = {
         return data
     },
 
-    // async updatePost(postId, payload) {
-    //     const { data } = await api.put(`/posts/update/${postId}`, payload)
-    //     return data
-    // },
+    async updatePost(postId, payload) {
+        const { data } = await api.put(`/posts/update/${postId}`, payload)
+        return data
+    },
 
     async deletePost(postId) {
         const { data } = await api.delete(`/posts/${postId}/delete`)
@@ -46,6 +47,18 @@ export const postService = {
         formData.append('file', file)
 
         const { data } = await api.post(`/posts/${postId}/images`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        return data
+    },
+
+    // Загрузка картинки без привязки к посту — для создания нового поста,
+    // когда post_id ещё не существует (см. PostComposer).
+    async uploadImage(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const { data } = await api.post('/posts/upload_image', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
         return data
