@@ -16,6 +16,33 @@ const START_INDEX = 1_000_000
 // ─── Отдельный компонент сообщения ─────────────────────────────────────────
 function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }) {
     const navigate = useNavigate();
+    const longPressTimer = useRef(null)
+    const touchMoved = useRef(false)
+
+    const handleTouchStart = (e) => {
+        if (!isOwn) return
+        touchMoved.current = false
+        const touch = e.touches[0]
+        longPressTimer.current = setTimeout(() => {
+            if (!touchMoved.current) {
+                if (navigator.vibrate) navigator.vibrate(30)
+                onContextMenu(
+                    { preventDefault: () => {}, clientX: touch.clientX, clientY: touch.clientY },
+                    message
+                )
+            }
+        }, 500)
+    }
+
+    const handleTouchMove = () => {
+        touchMoved.current = true
+        if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    }
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    }
+
     return (
         <div
             className={`${styles.messageRow} ${isOwn ? styles.own : ''}`}
@@ -29,6 +56,10 @@ function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }
             <div
                 className={styles.bubble}
                 onContextMenu={isOwn ? (e) => onContextMenu(e, message) : undefined}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
             >
                 {showSenderInfo && (
                     <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, opacity: 0.85 }}>
