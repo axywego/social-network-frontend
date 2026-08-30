@@ -8,7 +8,10 @@ import { useAuthContext } from '../../context/AuthContext'
 import { PostActionsProvider } from '../../context/PostActionsContext'
 import PostCard from '../../components/PostCard'
 import styles from './UserProfilePage.module.css'
-import Avatar from '../../components/Avatar'
+import Avatar, {resolveAvatarUrl} from '../../components/Avatar'
+import PostModeration from '../../components/PostModeration'
+import ImageZoomModal from '../../components/ImageZoomModal'
+import { useNotifications } from '../../context/NotificationContext'
 
 function UserProfilePage() {
     const { userId } = useParams()
@@ -16,10 +19,14 @@ function UserProfilePage() {
     const { currentUser } = useAuthContext()
 
     const [profile, setProfile] = useState(null)
+    const { isUserOnline } = useNotifications()
     const [posts, setPosts] = useState([])
+    const [friendCount, setFriendCount] = useState(0)
     const [relation, setRelation] = useState('none')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    const [isZoomOpen, setIsZoomOpen] = useState(false)
 
     useEffect(() => {
         if (currentUser && userId === currentUser.id) {
@@ -32,19 +39,22 @@ function UserProfilePage() {
     const loadData = async () => {
         try {
             setLoading(true)
-            const [profileData, postsData, friends, incoming, outgoing] = await Promise.all([
+            const [profileData, postsData, friends, incoming, outgoing, friendCountData] = await Promise.all([
                 userService.getUserById(userId),
                 postService.getUserPosts(userId),
-                friendService.getFriends(),
+                friendService.getFriends(userId),
                 friendService.getIncomingRequests(),
-                friendService.getOutgoingRequests()
+                friendService.getOutgoingRequests(),
+                friendService.getFriendCount(userId)
             ])
+
+            setFriendCount(friendCountData)
             setProfile(profileData)
             setPosts(postsData)
 
-            if (friends.some(f => f.id === userId)) setRelation('friends')
-            else if (incoming.some(r => r.user.id === userId)) setRelation('incoming')
-            else if (outgoing.some(r => r.user.id === userId)) setRelation('outgoing')
+            if (friends.some(f => f.id === currentUser.id)) setRelation('friends')
+            else if (incoming.some(r => r.user.id === currentUser.id)) setRelation('incoming')
+            else if (outgoing.some(r => r.user.id === currentUser.id)) setRelation('outgoing')
             else setRelation('none')
         } catch (err) {
             setError('Не удалось загрузить профиль')
@@ -116,15 +126,6 @@ function UserProfilePage() {
         }
     }
 
-    const handleReportPost = async (post) => {
-        try {
-            await postService.reportPost(post.id)
-        } catch (err) {
-            console.error(err)
-            setError('Не удалось отправить жалобу')
-        }
-    }
-
     if (loading) {
         return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
     }
@@ -136,9 +137,15 @@ function UserProfilePage() {
     return (
         <div className={styles.container}>
             <div className={styles.profileHeader}>
-                <div className={styles.avatarLarge}>
-                    <Avatar avatarUrl={profile.avatar_url} size={100} />
+                <div className={styles.avatarLarge} style={{cursor:'pointer', overflow: 'visible'}} onClick={() => setIsZoomOpen(true)}>
+                    <Avatar avatarUrl={profile.avatar_url} isOnline={isUserOnline(profile.id)} size={100} />
                 </div>
+                {isZoomOpen && profile.avatar_url && (
+                    <ImageZoomModal
+                        src={resolveAvatarUrl(profile.avatar_url)}
+                        onClose={() => setIsZoomOpen(false)}
+                    />
+                )}
                 <div className={styles.info}>
                     <h1>{profile.last_name} {profile.first_name} {profile.patronymic || ''}</h1>
                     <p className={styles.username}>@{profile.username}</p>
@@ -146,6 +153,25 @@ function UserProfilePage() {
                     {profile.birthday && (
                         <p className={styles.birthday}>🎂 {new Date(profile.birthday).toLocaleDateString('ru-RU')}</p>
                     )}
+
+                    <div className={styles.statsRow}>
+                        <div className={styles.statBlock} style={{cursor: 'pointer'}} onClick={() => navigate(`/users/${profile.id}/friends`)}>
+                            <span className={styles.statValue}>{friendCount}</span>
+                            <span className={styles.statLabel}>Друзья</span>
+                        </div>
+                        <div className={styles.statBlock}>
+                            <span className={styles.statValue}>{posts.length}</span>
+                            <span className={styles.statLabel}>Постов</span>
+                        </div>
+                        {/* {profile.created_at && (
+                            <div className={styles.statBlock}>
+                                <span className={styles.statValue}>
+                                    {new Date(profile.created_at).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+                                </span>
+                                <span className={styles.statLabel}>На платформе с</span>
+                            </div>
+                        )} */}
+                    </div>
 
                     <div className={styles.actionsRow}>
                         {relation === 'none' && (
@@ -171,15 +197,11 @@ function UserProfilePage() {
             <h2 className={styles.postsTitle}>Посты</h2>
             <div className={styles.feed}>
                 {posts.length === 0 && <p className={styles.empty}>Пока нет постов</p>}
-                <PostActionsProvider onReport={handleReportPost}>
+                <PostModeration posts={posts} setPosts={setPosts}>
                     {posts.map(post => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            author={profile}
-                        />
+                        <PostCard key={post.id} post={post} author={post.author} />
                     ))}
-                </PostActionsProvider>
+                </PostModeration>
             </div>
         </div>
     )

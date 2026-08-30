@@ -44,6 +44,16 @@ export const chatService = {
         return data
     },
 
+    async editMessage(chatId, messageId, payload) {
+        const { data } = await api.patch(`/chats/${chatId}/edit/${messageId}`, payload)
+        return data
+    },
+
+    async deleteMessage(chatId, messageId) {
+        const { data } = await api.delete(`/chats/${chatId}/delete/${messageId}`)
+        return data
+    },
+
     async fetchImageBlob(imageUrl) {
         const { data } = await api.get(imageUrl, { responseType: 'blob' })
         return URL.createObjectURL(data)
@@ -59,7 +69,7 @@ export const chatService = {
         return data
     },
 
-    connectToChat(chatId, { onMessage, onRead, onOpen }) {
+    connectToChat(chatId, { onMessage, onRead, onOpen, onEdit, onDelete }) {
         const token = localStorage.getItem('accessToken')
         const wsUrl = `${API_URL.replace(/^http/, 'ws')}/chats/ws/${chatId}?token=${token}`
         const ws = new WebSocket(wsUrl)
@@ -69,6 +79,10 @@ export const chatService = {
             const data = JSON.parse(event.data)
             if (data.type === 'message_read') {
                 onRead?.(data)
+            } else if (data.type === 'message_edited') {
+                onEdit?.(data.message)
+            } else if (data.type === 'message_deleted') {
+                onDelete?.(data.message_id)
             } else {
                 onMessage?.(data)
             }

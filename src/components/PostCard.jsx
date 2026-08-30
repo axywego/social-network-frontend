@@ -10,7 +10,13 @@ import ImageZoomModal from './ImageZoomModal'
 function PostCard({ post, author }) {
     const navigate = useNavigate()
     const { currentUser } = useAuthContext()
-    const { onEdit, onDelete, onReport } = usePostActions()
+    const { onEdit, onDelete, onReport, editingPostId, onSaveEdit, onCancelEdit } = usePostActions()
+
+    const isEditing = post.id === editingPostId
+
+    const [editText, setEditText] = useState(post.content || '')
+    const [editImage, setEditImage] = useState(post.image_url || '')
+    const [editSaving, setEditSaving] = useState(false)
 
     const isOwner = currentUser?.id === author?.id
 
@@ -27,6 +33,10 @@ function PostCard({ post, author }) {
 
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef(null)
+
+    useEffect(() => {
+        if (isEditing) setEditText(post.content || '')
+    }, [isEditing, post.content])
 
     useEffect(() => {
         if (!menuOpen) return
@@ -90,6 +100,19 @@ function PostCard({ post, author }) {
     const handleEditClick = () => {
         setMenuOpen(false)
         onEdit(post)
+    }
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault()
+        if (!editText.trim() || editSaving) return
+        setEditSaving(true)
+        await onSaveEdit(post.id, editText.trim(), editImage)
+        setEditSaving(false)
+    }
+
+    const handleEditCancel = () => {
+        setEditText(post.content || '')
+        onCancelEdit()
     }
 
     const handleDeleteClick = () => {
@@ -173,18 +196,41 @@ function PostCard({ post, author }) {
                 </div>
             </div>
 
-            {post.content && <div className={styles.content}>{post.content}</div>}
+            {isEditing ? (
+                <form className={styles.editForm} onSubmit={handleEditSubmit}>
+                    <textarea
+                        className={styles.editTextarea}
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={3}
+                        autoFocus
+                        onKeyDown={(e) => {
+                            if (e.key === 'Escape') handleEditCancel()
+                        }}
+                    />
+                    <div className={styles.editActions}>
+                        <button style={{backgroundColor: "#d64545"}} type="button" onClick={handleEditCancel} disabled={editSaving}>
+                            Отмена
+                        </button>
+                        <button style={{backgroundColor: "#3f6b4a"}} type="submit" disabled={editSaving || !editText.trim()}>
+                            {editSaving ? 'Сохранение...' : 'Сохранить'}
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                post.content && <div className={styles.content}>{post.content}</div>
+            )}
             <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
                 {post.image_url && (
                     <img
                         src={postService.resolveImageUrl(post.image_url)}
                         alt="post attachment"
                         className={styles.image}
-                        style= {{cursor: 'zoom-in'}}
+                        style={{ cursor: 'zoom-in' }}
                         onClick={() => setIsZoomOpen(true)}
                     />
                 )}
-            </div>            
+            </div>        
 
             <div className={styles.actions}>
                 <button
@@ -220,8 +266,13 @@ function PostCard({ post, author }) {
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
                         />
-                        <button type="submit" disabled={sending}>
-                            {sending ? '...' : 'Отправить'}
+                        <button type="submit" disabled={sending} className={styles.sendBtn}>
+                            {sending ? '...' : (
+                                <>
+                                    <span className={styles.sendBtnText}>Отправить</span>
+                                    <span className={styles.sendBtnIcon}>&#x2708;</span>
+                                </>
+                            )}
                         </button>
                     </form>
                 </div>

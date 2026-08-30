@@ -89,3 +89,61 @@
     padding: 16px;
     border-radius: var(--radius-md);
 }
+
+.statsRow {
+    display: flex;
+    gap: 10px;
+    margin: 4px 0 16px;
+    flex-wrap: wrap;
+}
+
+@media(max-width: 768px) {
+    .statsRow {
+        justify-content: space-around;
+    }
+}
+
+.statBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: background 0.15s ease;
+}
+
+.statBlock:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.statValue {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: white;
+}
+
+.statLabel {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 3px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .profileHeader {
+        gap: 10px;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+

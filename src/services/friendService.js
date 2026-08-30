@@ -1,8 +1,8 @@
 import api from './api'
 
 export const friendService = {
-    async getFriends() {
-        const { data } = await api.get('/friends/list')
+    async getFriends(userId) {
+        const { data } = await api.get(`/friends/list/${userId}`)
         return data
     },
 
@@ -33,6 +33,11 @@ export const friendService = {
 
     async removeFriend(targetLogin) {
         const { data } = await api.delete('/friends/remove_friend', { data: { target_login: targetLogin } })
+        return data
+    },
+
+    async getFriendCount(userId) {
+        const { data } = await api.get(`/friends/count/${userId}`)
         return data
     }
 }

@@ -17,6 +17,10 @@ export const postService = {
         return data
     },
 
+    async getPostCount(userId) {
+        const { data } = await api.get(`/posts/count/${userId}`)
+    },
+
     async getUserPosts(userId) {
         const { data } = await api.get(`/posts/${userId}`)
         return data
@@ -26,6 +30,11 @@ export const postService = {
         const { data } = await api.post('/posts/create_post', payload)
         return data
     },
+
+    // async updatePost(postId, payload) {
+    //     const { data } = await api.put(`/posts/update/${postId}`, payload)
+    //     return data
+    // },
 
     async deletePost(postId) {
         const { data } = await api.delete(`/posts/${postId}/delete`)

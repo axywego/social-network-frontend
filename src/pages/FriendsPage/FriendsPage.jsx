@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { friendService } from '../../services/friendService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
@@ -11,12 +11,28 @@ const SEARCH_LIMIT = 20
 
 function FriendsPage() {
     const navigate = useNavigate()
+    const { userId: routeUserId } = useParams()
     const { currentUser } = useAuthContext()
 
+    // Если параметра нет в роуте (маршрут /friends) — это моя страница друзей.
+    // Сравнение через String(), т.к. id из URL всегда строка, а currentUser.id может быть числом.
+    const targetUserId = routeUserId ?? currentUser?.id
+    const isOwnPage = !routeUserId || String(routeUserId) === String(currentUser?.id)
+
     const [activeTab, setActiveTab] = useState(TABS.FRIENDS)
-    const [friends, setFriends] = useState([])
+
+    // Мои собственные отношения — нужны ВСЕГДА (даже на чужой странице),
+    // чтобы корректно рисовать кнопки "Добавить"/"Удалить" относительно себя
+    const [myFriends, setMyFriends] = useState([])
     const [incoming, setIncoming] = useState([])
     const [outgoing, setOutgoing] = useState([])
+
+    // Список друзей, который непосредственно отображается на странице.
+    // На своей странице это = myFriends, на чужой — друзья targetUserId
+    const [displayedFriends, setDisplayedFriends] = useState([])
+
+    const [targetProfile, setTargetProfile] = useState(null)
+
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -29,20 +45,41 @@ function FriendsPage() {
     const abortRef = useRef(null)
 
     useEffect(() => {
+        setActiveTab(TABS.FRIENDS)
+        setQuery('')
         loadAll()
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [targetUserId])
 
     const loadAll = async () => {
+        if (!targetUserId) return
         try {
             setLoading(true)
-            const [friendsData, incomingData, outgoingData] = await Promise.all([
-                friendService.getFriends(),
-                friendService.getIncomingRequests(),
-                friendService.getOutgoingRequests()
-            ])
-            setFriends(friendsData)
-            setIncoming(incomingData)
-            setOutgoing(outgoingData)
+            if (isOwnPage) {
+                const [friendsData, incomingData, outgoingData] = await Promise.all([
+                    friendService.getFriends(currentUser.id),
+                    friendService.getIncomingRequests(),
+                    friendService.getOutgoingRequests()
+                ])
+                setMyFriends(friendsData)
+                setDisplayedFriends(friendsData)
+                setIncoming(incomingData)
+                setOutgoing(outgoingData)
+                setTargetProfile(null)
+            } else {
+                const [myFriendsData, incomingData, outgoingData, targetFriendsData, profile] = await Promise.all([
+                    friendService.getFriends(currentUser.id),
+                    friendService.getIncomingRequests(),
+                    friendService.getOutgoingRequests(),
+                    friendService.getFriends(targetUserId),
+                    userService.getUserById(targetUserId)
+                ])
+                setMyFriends(myFriendsData)
+                setIncoming(incomingData)
+                setOutgoing(outgoingData)
+                setDisplayedFriends(targetFriendsData)
+                setTargetProfile(profile)
+            }
         } catch (err) {
             setError('Не удалось загрузить друзей')
             console.error(err)
@@ -75,8 +112,9 @@ function FriendsPage() {
         }
     }, [])
 
-    // debounce поискового запроса
+    // debounce поискового запроса (только на своей странице)
     useEffect(() => {
+        if (!isOwnPage) return
         if (!query.trim()) {
             setSearchResults([])
             setSearchTotal(0)
@@ -86,14 +124,17 @@ function FriendsPage() {
             runSearch(query.trim(), 0)
         }, 300)
         return () => clearTimeout(timer)
-    }, [query, runSearch])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query, runSearch, isOwnPage])
 
     const loadMoreResults = () => {
         runSearch(query.trim(), searchOffset + SEARCH_LIMIT)
     }
 
+    // Статус считается всегда относительно МЕНЯ (currentUser), а не владельца страницы
     const relationStatus = (userId) => {
-        if (friends.some(f => f.id === userId)) return 'friends'
+        if (userId === currentUser?.id) return 'self'
+        if (myFriends.some(f => f.id === userId)) return 'friends'
         if (incoming.some(r => r.user.id === userId)) return 'incoming'
         if (outgoing.some(r => r.user.id === userId)) return 'outgoing'
         return 'none'
@@ -113,8 +154,9 @@ function FriendsPage() {
         try {
             await friendService.acceptRequest(username)
             setIncoming(prev => prev.filter(r => r.user.username !== username))
-            const friendsData = await friendService.getFriends()
-            setFriends(friendsData)
+            const friendsData = await friendService.getFriends(currentUser.id)
+            setMyFriends(friendsData)
+            if (isOwnPage) setDisplayedFriends(friendsData)
         } catch (err) {
             console.error(err)
         }
@@ -133,7 +175,10 @@ function FriendsPage() {
     const handleRemoveFriend = async (username) => {
         try {
             await friendService.removeFriend(username)
-            setFriends(prev => prev.filter(f => f.username !== username))
+            setMyFriends(prev => prev.filter(f => f.username !== username))
+            if (isOwnPage) {
+                setDisplayedFriends(prev => prev.filter(f => f.username !== username))
+            }
         } catch (err) {
             console.error(err)
         }
@@ -141,6 +186,7 @@ function FriendsPage() {
 
     const renderActionButton = (user) => {
         const status = relationStatus(user.id)
+        if (status === 'self') return null
         if (status === 'friends') {
             return <button className={styles.removeBtn} onClick={() => handleRemoveFriend(user.username)}>Удалить</button>
         }
@@ -164,22 +210,28 @@ function FriendsPage() {
 
     return (
         <div className={styles.container}>
-            <h1>Друзья</h1>
+            <h1>
+                {isOwnPage
+                    ? 'Друзья'
+                    : `Друзья: ${targetProfile ? `${targetProfile.first_name} ${targetProfile.last_name}` : ''}`}
+            </h1>
 
-            <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Поиск по логину, имени или фамилии..."
-                value={query}
-                onChange={(e) => { setQuery(e.target.value); setActiveTab(TABS.SEARCH) }}
-            />
+            {isOwnPage && (
+                <input
+                    type="text"
+                    className={styles.searchInput}
+                    placeholder="Поиск по логину, имени или фамилии..."
+                    value={query}
+                    onChange={(e) => { setQuery(e.target.value); setActiveTab(TABS.SEARCH) }}
+                />
+            )}
 
             {error && <div className={styles.error}>{error}</div>}
 
-            {activeTab !== TABS.SEARCH && (
+            {isOwnPage && activeTab !== TABS.SEARCH && (
                 <div className={styles.tabs}>
                     <button className={activeTab === TABS.FRIENDS ? styles.tabActive : styles.tab} onClick={() => setActiveTab(TABS.FRIENDS)}>
-                        Друзья ({friends.length})
+                        Друзья ({myFriends.length})
                     </button>
                     <button className={activeTab === TABS.INCOMING ? styles.tabActive : styles.tab} onClick={() => setActiveTab(TABS.INCOMING)}>
                         Входящие ({incoming.length})
@@ -190,7 +242,7 @@ function FriendsPage() {
                 </div>
             )}
 
-            {activeTab === TABS.SEARCH && (
+            {isOwnPage && activeTab === TABS.SEARCH && (
                 <div className={styles.list}>
                     {!searchLoading && searchResults.length === 0 && <p className={styles.empty}>Никого не найдено</p>}
                     {searchResults.map(user => (
@@ -212,10 +264,12 @@ function FriendsPage() {
                 </div>
             )}
 
-            {activeTab === TABS.FRIENDS && (
+            {(!isOwnPage || activeTab === TABS.FRIENDS) && (
                 <div className={styles.list}>
-                    {friends.length === 0 && <p className={styles.empty}>Пока нет друзей</p>}
-                    {friends.map(friend => (
+                    {displayedFriends.length === 0 && (
+                        <p className={styles.empty}>{isOwnPage ? 'Пока нет друзей' : 'У пользователя пока нет друзей'}</p>
+                    )}
+                    {displayedFriends.map(friend => (
                         <div key={friend.id} className={styles.item}>
                             <div className={styles.clickable} onClick={() => navigate(`/users/${friend.id}`)}>
                                 <Avatar avatarUrl={friend.avatar_url} size={52} />
@@ -224,13 +278,13 @@ function FriendsPage() {
                                     <div className={styles.username}>@{friend.username}</div>
                                 </div>
                             </div>
-                            <button className={styles.removeBtn} onClick={() => handleRemoveFriend(friend.username)}>Удалить</button>
+                            {renderActionButton(friend)}
                         </div>
                     ))}
                 </div>
             )}
 
-            {activeTab === TABS.INCOMING && (
+            {isOwnPage && activeTab === TABS.INCOMING && (
                 <div className={styles.list}>
                     {incoming.length === 0 && <p className={styles.empty}>Нет входящих заявок</p>}
                     {incoming.map(req => (
@@ -251,7 +305,7 @@ function FriendsPage() {
                 </div>
             )}
 
-            {activeTab === TABS.OUTGOING && (
+            {isOwnPage && activeTab === TABS.OUTGOING && (
                 <div className={styles.list}>
                     {outgoing.length === 0 && <p className={styles.empty}>Нет исходящих заявок</p>}
                     {outgoing.map(req => (

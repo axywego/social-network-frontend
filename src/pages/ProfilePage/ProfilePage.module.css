@@ -76,3 +76,11 @@
 .feed { display: flex; flex-direction: column; }
 .empty { text-align: center; color: var(--color-ink-faint); padding: 30px; }
 .loading { text-align: center; padding: 40px; color: var(--color-ink-soft); }
+
+@media (max-width: 768px) {
+    .myProfile {
+        gap: 10px;
+        flex-direction: column;
+        align-items: center;
+    }
+}

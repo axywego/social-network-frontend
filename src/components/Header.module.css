@@ -88,3 +88,10 @@
 .profileLink:hover img {
     box-shadow: 0 0 0 1.5px var(--color-moss);
 }
+
+@media (max-width: 768px) {
+    .inner {
+        gap: 10px;
+        flex-direction: column;
+    }
+}

@@ -33,6 +33,7 @@ function AppContent() {
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                     <Route path="/feed" element={<FeedPage />} />
                     <Route path="/friends" element={<FriendsPage />} />
+                    <Route path="/users/:userId/friends" element={<FriendsPage />} />
                     <Route path="/chats" element={<ChatsPage />} />
                     <Route path="/chats/:chatId" element={<ChatWindowPage />} />
                     <Route path="/profile" element={<ProfilePage />} />

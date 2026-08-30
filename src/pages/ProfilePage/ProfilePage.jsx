@@ -9,7 +9,9 @@ import { PostActionsProvider } from '../../context/PostActionsContext'
 import PostCard from '../../components/PostCard'
 import PostComposer from '../../components/PostComposer'
 import styles from './ProfilePage.module.css'
-import Avatar from '../../components/Avatar'
+import Avatar, {resolveAvatarUrl} from '../../components/Avatar'
+import PostModeration from '../../components/PostModeration'
+import ImageZoomModal from '../../components/ImageZoomModal'
 
 function ProfilePage() {
     const navigate = useNavigate()
@@ -21,6 +23,8 @@ function ProfilePage() {
     const [form, setForm] = useState(null)
     const [error, setError] = useState(null)
     const fileInputRef = useRef(null)
+
+    const [isZoomOpen, setIsZoomOpen] = useState(false)
 
     useEffect(() => {
         loadPosts()
@@ -100,25 +104,6 @@ function ProfilePage() {
         }
     }
 
-    const handleEditPost = (post) => {
-        // фичи еще нет!!!
-    }
-
-    const handleDeletePost = async (post) => {
-        if (!window.confirm('Удалить пост?')) return
-
-        const prevPosts = posts
-        setPosts(prev => prev.filter(p => p.id !== post.id))
-
-        try {
-            await postService.deletePost(post.id)
-        } catch (err) {
-            console.error(err)
-            setPosts(prevPosts)
-            setError('Не удалось удалить пост')
-        }
-    }
-
     if (!currentUser || loading) {
         return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
     }
@@ -133,12 +118,27 @@ function ProfilePage() {
             {error && <div className={styles.error}>{error}</div>}
 
             <div className={styles.myProfile}>
-                <div className={styles.avatarLarge} onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
+                <div 
+                    className={styles.avatarLarge}
+                    onClick={editing ? handleAvatarClick : () => setIsZoomOpen(true)}
+                    style={{ cursor: 'pointer' }}
+                >
                     <Avatar avatarUrl={currentUser.avatar_url} size={100} />
                     {uploading && <div className={styles.uploadOverlay}>...</div>}
                 </div>
+                {isZoomOpen && currentUser.avatar_url && (
+                    <ImageZoomModal
+                        src={resolveAvatarUrl(currentUser.avatar_url)}
+                        onClose={() => setIsZoomOpen(false)}
+                    />
+                )}
 
-                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    style={{ display: 'none' }} />
 
                 {!editing ? (
                     <div className={styles.myInfo}>
@@ -170,15 +170,11 @@ function ProfilePage() {
             <h2 className={styles.postsTitle}>Мои посты</h2>
             <div className={styles.feed}>
                 {posts.length === 0 && <p className={styles.empty}>У вас пока нет постов</p>}
-                <PostActionsProvider onEdit={handleEditPost} onDelete={handleDeletePost}>
+                <PostModeration posts={posts} setPosts={setPosts}>
                     {posts.map(post => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            author={currentUser}
-                        />
+                        <PostCard key={post.id} post={post} author={post.author} />
                     ))}
-                </PostActionsProvider>
+                </PostModeration>
             </div>
         </div>
     )

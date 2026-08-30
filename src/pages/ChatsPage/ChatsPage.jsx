@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
 import { useNotifications } from '../../context/NotificationContext'
+import { useAuthContext } from '../../context/AuthContext'
 import styles from './ChatsPage.module.css'
 import Avatar from '../../components/Avatar'
 
@@ -15,11 +16,14 @@ function ChatsPage() {
     const [showCreateGroup, setShowCreateGroup] = useState(false)
     const [groupName, setGroupName] = useState('')
 
+    const { currentUser } = useAuthContext()
+
     const { subscribe, getActiveChatId } = useNotifications()
 
     useEffect(() => {
         loadChats()
-        friendService.getFriends().then(setFriends).catch(console.error)
+        console.log(currentUser.id)
+        friendService.getFriends(currentUser.id).then(setFriends).catch(console.error)
     }, [])
 
     useEffect(() => {

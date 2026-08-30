@@ -265,3 +265,49 @@
     background: var(--color-ink-faint);
     cursor: not-allowed;
 }
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.editTextarea {
+    resize: vertical;
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.editActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.editActions button {
+    padding: 9px 18px;
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: background 0.15s ease;
+}
+
+.sendBtnIcon {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .sendBtnText {
+        display: none;
+    }
+    .sendBtnIcon {
+        display: inline;
+    }
+}

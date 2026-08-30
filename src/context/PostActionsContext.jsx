@@ -2,26 +2,28 @@ import { createContext, useContext } from 'react'
 
 const PostActionsContext = createContext(null)
 
-const noop = () => {}
-
-export function PostActionsProvider({ onEdit, onDelete, onReport, children }) {
-    const value = {
-        onEdit: onEdit || noop,
-        onDelete: onDelete || noop,
-        onReport: onReport || noop,
-    }
-
+export function PostActionsProvider({
+    onEdit,
+    onDelete,
+    onReport,
+    editingPostId,
+    onSaveEdit,
+    onCancelEdit,
+    children,
+}) {
     return (
-        <PostActionsContext.Provider value={value}>
+        <PostActionsContext.Provider
+            value={{ onEdit, onDelete, onReport, editingPostId, onSaveEdit, onCancelEdit }}
+        >
             {children}
         </PostActionsContext.Provider>
     )
 }
 
 export function usePostActions() {
-    const context = useContext(PostActionsContext)
-    if (!context) {
+    const ctx = useContext(PostActionsContext)
+    if (!ctx) {
         throw new Error('usePostActions должен использоваться внутри PostActionsProvider')
     }
-    return context
+    return ctx
 }

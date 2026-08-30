@@ -86,6 +86,8 @@
 }
 
 .bubble {
+    margin-right: 10px;
+    margin-left: 10px;
     max-width: 60%;
     padding: 10px 14px;
     border-radius: var(--radius-md);
@@ -304,4 +306,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.sendBtnText {
+    display: inline;
+}
+
+.sendBtnIcon {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .sendBtnText {
+        display: none;
+    }
+    .sendBtnIcon {
+        display: inline;
+    }
 }

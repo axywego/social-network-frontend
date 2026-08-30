@@ -32,6 +32,7 @@ export function NotificationProvider({ children }) {
     const listenersRef = useRef(new Set())
     const wsRef = useRef(null)
     const [toasts, setToasts] = useState([])
+    const [onlineUsers, setOnlineUsers] = useState(() => new Set())
 
     const activeChatIdRef = useRef(null)
 
@@ -61,11 +62,32 @@ export function NotificationProvider({ children }) {
         if (!currentUser) {
             wsRef.current?.close()
             wsRef.current = null
+            setOnlineUsers(new Set())
             return
         }
 
         const conn = notificationService.connectToSever({
             onEvent: (notification) => {
+                // Обновление одного юзера: он стал онлайн/офлайн
+                if (notification.type === 'presence') {
+                    setOnlineUsers(prev => {
+                        const next = new Set(prev)
+                        if (notification.online) {
+                            next.add(notification.user_id)
+                        } else {
+                            next.delete(notification.user_id)
+                        }
+                        return next
+                    })
+                    return
+                }
+
+                // Начальный снепшот текущего онлайна при подключении
+                if (notification.type === 'presence_snapshot') {
+                    setOnlineUsers(new Set(notification.online))
+                    return
+                }
+
                 listenersRef.current.forEach(listener => listener(notification))
                 pushToast(notification)
             }
@@ -83,8 +105,15 @@ export function NotificationProvider({ children }) {
         return () => listenersRef.current.delete(listener)
     }, [])
 
+    const isUserOnline = useCallback(
+        (userId) => onlineUsers.has(userId),
+        [onlineUsers]
+    )
+
     return (
-        <NotificationContext.Provider value={{ subscribe, setActiveChatId, getActiveChatId }}>
+        <NotificationContext.Provider
+            value={{ subscribe, setActiveChatId, getActiveChatId, isUserOnline }}
+        >
             {children}
             <ToastContainer toasts={toasts} onDismiss={removeToast} />
         </NotificationContext.Provider>
