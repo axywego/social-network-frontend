@@ -55,9 +55,9 @@ function RegisterPage() {
             birthday: formData.birthday || null
         }
 
-        // Имя пользователя - только латиница, 5-14 символов
-        if (!/^[a-zA-Z]{5,14}$/.test(dataToSend.username)) {
-            setError('Имя пользователя должно содержать только латиницу (5-14 символов)!')
+        // Имя пользователя - только латиница, 5-32 символов
+        if (!/^[a-zA-Z]{5,32}$/.test(dataToSend.username)) {
+            setError('Имя пользователя должно содержать только латиницу (5-32 символов)!')
             setLoading(false)
             return
         }
