@@ -47,12 +47,13 @@ function LoginPage() {
             <div className={styles.card}>
                 <h1 className={styles.title}>Вход</h1>
                 
-                {error && <div className={styles.error}>{error}</div>}
+                {error && <div className={styles.error} role="alert">{error}</div>}
                 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.field}>
-                        <label>Логин</label>
+                        <label htmlFor="login-username">Логин</label>
                         <input
+                            id="login-username"
                             type="text"
                             name="username"
                             value={formData.username}
@@ -63,8 +64,9 @@ function LoginPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Пароль</label>
+                        <label htmlFor="login-password">Пароль</label>
                         <input
+                            id="login-password"
                             type="password"
                             name="password"
                             value={formData.password}

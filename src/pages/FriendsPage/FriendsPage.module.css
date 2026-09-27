@@ -69,7 +69,8 @@
     box-shadow: var(--shadow-card);
 }
 
-.clickable { display: flex; align-items: center; gap: 14px; cursor: pointer; flex: 1; min-width: 0; }
+.clickable { display: flex; align-items: center; gap: 14px; cursor: pointer; flex: 1; min-width: 0; text-decoration: none; color: inherit; }
+.clickable:hover .name { text-decoration: underline; }
 
 .avatar {
     width: 44px; height: 44px; border-radius: 50%;

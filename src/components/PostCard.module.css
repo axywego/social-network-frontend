@@ -15,9 +15,10 @@
     margin-bottom: 14px;
 }
 
-.header > div[style] {
-    cursor: pointer;
-}
+.authorLink { display: flex; gap: 12px; color: inherit; text-decoration: none; }
+.authorLink:hover .author { text-decoration: underline; }
+.imageButton { display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.actionError { color: var(--color-danger); font-size: 13px; margin: 8px 0; }
 
 .header img {
     display: block;

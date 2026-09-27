@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { postService } from '../services/postService'
+import { validateImageFile } from '../utils/imageFile'
 import { useAuthContext } from '../context/AuthContext'
 import { usePostActions } from '../context/PostActionsContext'
 import styles from './PostCard.module.css'
@@ -8,7 +9,6 @@ import Avatar from './Avatar'
 import ImageZoomModal from './ImageZoomModal'
 
 function PostCard({ post, author }) {
-    const navigate = useNavigate()
     const { currentUser } = useAuthContext()
     const { onEdit, onDelete, onReport, editingPostId, onSaveEdit, onCancelEdit } = usePostActions()
 
@@ -35,11 +35,19 @@ function PostCard({ post, author }) {
     const [showComments, setShowComments] = useState(false)
     const [commentText, setCommentText] = useState('')
     const [sending, setSending] = useState(false)
+    const [actionError, setActionError] = useState('')
 
     const [isZoomOpen, setIsZoomOpen] = useState(false)
 
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef(null)
+
+    useEffect(() => {
+        const previewUrl = pendingImage?.previewUrl
+        return () => {
+            if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
+        }
+    }, [pendingImage?.previewUrl, isEditing])
 
     useEffect(() => {
         if (!isEditing) return
@@ -74,6 +82,7 @@ function PostCard({ post, author }) {
 
     const handleToggleLike = async () => {
         if (likeBusy) return
+        setActionError('')
         setLikeBusy(true)
         try {
             if (liked) {
@@ -86,6 +95,7 @@ function PostCard({ post, author }) {
             setLiked(v => !v)
         } catch (err) {
             console.error(err)
+            setActionError('Не удалось изменить отметку. Попробуйте снова.')
         } finally {
             setLikeBusy(false)
         }
@@ -96,9 +106,8 @@ function PostCard({ post, author }) {
         if (!commentText.trim()) return
 
         setSending(true)
+        setActionError('')
         try {
-            console.log(`${post.id}: ${commentText.trim()}`)
-
             const comment = await postService.createComment({ post_id: post.id, content: commentText.trim() })
 
             setComments(prev => [...prev, comment])
@@ -106,6 +115,7 @@ function PostCard({ post, author }) {
             setShowComments(true)
         } catch (err) {
             console.error(err)
+            setActionError('Не удалось отправить комментарий. Попробуйте снова.')
         } finally {
             setSending(false)
         }
@@ -125,6 +135,8 @@ function PostCard({ post, author }) {
         setEditSaving(true)
         try {
             await onSaveEdit(post.id, trimmedText, pendingImage ? pendingImage.filename : null)
+        } catch (err) {
+            console.error(err)
         } finally {
             setEditSaving(false)
         }
@@ -151,6 +163,13 @@ function PostCard({ post, author }) {
         e.target.value = '' // чтобы можно было выбрать тот же файл повторно
         if (!file) return
 
+        const validationError = validateImageFile(file)
+        if (validationError) {
+            setActionError(validationError)
+            return
+        }
+        setActionError('')
+
         if (pendingImage?.previewUrl?.startsWith('blob:')) URL.revokeObjectURL(pendingImage.previewUrl)
         const previewUrl = URL.createObjectURL(file)
         setPendingImage({ filename: null, previewUrl, uploading: true })
@@ -163,6 +182,7 @@ function PostCard({ post, author }) {
             )
         } catch (err) {
             console.error(err)
+            setActionError('Не удалось загрузить изображение.')
             setPendingImage(prev => (prev?.previewUrl === previewUrl ? null : prev))
         }
     }
@@ -204,15 +224,13 @@ function PostCard({ post, author }) {
     return (
         <div className={styles.card}>
             <div className={styles.header} >
-                <div style={ {display: "flex", gap: "12px", flexDirection: "row"} }
-                 onClick={() => navigate(`/users/${author.id}`)}
-                >
+                <Link className={styles.authorLink} to={`/users/${author.id}`}>
                     <Avatar avatarUrl={author?.avatar_url} size={38} />
                     <div>
                         <div className={styles.author}>{`${author.first_name} ${author.last_name}`}</div>
                         <div className={styles.time}>{getDate(new Date(post.created_at))}</div>
                     </div>
-                </div>
+                </Link>
 
                 <div className={styles.menuWrapper} ref={menuRef}>
                     <button
@@ -275,6 +293,7 @@ function PostCard({ post, author }) {
                                 type="button"
                                 onClick={handleRemoveEditImage}
                                 title="Убрать изображение"
+                                aria-label="Убрать изображение"
                                 className={styles.editImageRemoveBtn}
                             >
                                 ✕
@@ -318,13 +337,9 @@ function PostCard({ post, author }) {
             {!isEditing && (
                 <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
                     {post.image_url && (
-                        <img
-                            src={postService.resolveImageUrl(post.image_url)}
-                            alt="post attachment"
-                            className={styles.image}
-                            style={{ cursor: 'zoom-in' }}
-                            onClick={() => setIsZoomOpen(true)}
-                        />
+                        <button type="button" className={styles.imageButton} onClick={() => setIsZoomOpen(true)} aria-label="Открыть изображение поста">
+                            <img src={postService.resolveImageUrl(post.image_url)} alt="Изображение поста" className={styles.image} loading="lazy" />
+                        </button>
                     )}
                 </div>
             )}
@@ -341,14 +356,15 @@ function PostCard({ post, author }) {
                     💬 {comments.length > 0 ? comments.length : 'Комментировать'}
                 </button>
             </div>
+            {actionError && <p className={styles.actionError} role="alert">{actionError}</p>}
 
             {showComments && (
                 <div className={styles.commentsSection}>
                     {comments.map((c, i) => (
                         <div key={i} className={styles.commentItem}>
-                            <div style={{cursor: 'pointer'}} onClick={() => navigate(`/users/${c.author.id}`)}>
+                            <Link to={`/users/${c.author.id}`} aria-label={`Профиль: ${c.author.first_name} ${c.author.last_name}`}>
                                 <Avatar avatarUrl={c.author.avatar_url} size={38}/>
-                            </div>
+                            </Link>
                             <div className={styles.commentBody}>
                                 <span className={styles.commentAuthor}>{c.author.first_name} {c.author.last_name}</span>
                                 <span className={styles.commentText}>{c.content}</span>
@@ -357,7 +373,9 @@ function PostCard({ post, author }) {
                     ))}
 
                     <form className={styles.commentForm} onSubmit={handleSendComment}>
+                        <label className="visually-hidden" htmlFor={`comment-${post.id}`}>Комментарий</label>
                         <input
+                            id={`comment-${post.id}`}
                             type="text"
                             placeholder="Написать комментарий..."
                             value={commentText}

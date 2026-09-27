@@ -3,7 +3,8 @@ import { chatService } from '../services/chatService'
 import ImageZoomModal from './ImageZoomModal'
 
 function ChatImage({ imageUrl, className, width, height }) {
-    const [blobUrl, setBlobUrl] = useState(null)
+    const [blob, setBlob] = useState(null)
+    const blobUrl = blob?.source === imageUrl ? blob.url : null
 
     const [isZoomOpen, setIsZoomOpen] = useState(false)
 
@@ -30,16 +31,22 @@ function ChatImage({ imageUrl, className, width, height }) {
 
     useEffect(() => {
         let cancelled = false
+        let loadedUrl = null
 
         chatService.fetchImageBlob(imageUrl)
             .then(url => {
+                loadedUrl = url
                 if (!cancelled) {
-                    setBlobUrl(url)
+                    setBlob({ source: imageUrl, url })
+                } else {
+                    URL.revokeObjectURL(url)
                 }
             })
+            .catch(err => console.error('Не удалось загрузить изображение чата:', err))
 
         return () => {
             cancelled = true
+            if (loadedUrl) URL.revokeObjectURL(loadedUrl)
         }
     }, [imageUrl])
 
@@ -56,20 +63,15 @@ function ChatImage({ imageUrl, className, width, height }) {
             }}
         >
             {blobUrl && (
-                <img
-                    src={blobUrl}
-                    alt="attachment"
-                    width={displaySize.width}
-                    height={displaySize.height}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                        cursor: 'zoom-in'
-                    }}
-                    onClick={() => setIsZoomOpen(true)}
-                />
+                <button type="button" onClick={() => setIsZoomOpen(true)} aria-label="Открыть изображение чата" style={{ padding: 0, border: 0, background: 'none', width: '100%', height: '100%', cursor: 'zoom-in' }}>
+                    <img
+                        src={blobUrl}
+                        alt="Изображение чата"
+                        width={displaySize.width}
+                        height={displaySize.height}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                </button>
             )}
             {isZoomOpen && (
                 <ImageZoomModal
