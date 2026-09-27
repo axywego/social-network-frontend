@@ -1,16 +1,23 @@
-# React + Vite
+# Coova — фронтенд социальной сети
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Клиент на React и Vite. Для входа, ленты, друзей и чатов нужен отдельный API-сервер.
 
-Currently, two official plugins are available:
+## Запуск
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Требуется Node.js 20.19+ или 22.12+ и npm.
 
-## React Compiler
+```bash
+npm ci
+VITE_API_URL=http://localhost:8000 npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Откройте адрес, который выведет Vite (обычно `http://localhost:5173`). Значение `VITE_API_URL` должно указывать на API-сервер и включать протокол. Оно используется также для WebSocket-подключений. Если API запущен на другом адресе, замените значение переменной.
 
-## Expanding the ESLint configuration
+## Проверка
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run build
+npm run lint
+```
+
+`npm run lint` пока сообщает о проблемах в существующем коде; они не блокируют сборку.

@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
 import styles from './RegisterPage.module.css'
 import Avatar from '../../components/Avatar'
+import { validateImageFile } from '../../utils/imageFile'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -23,6 +24,12 @@ function RegisterPage() {
     const [loading, setLoading] = useState(false)
     const avatarInputRef = useRef(null)
 
+    useEffect(() => {
+        return () => {
+            if (avatarPreview) URL.revokeObjectURL(avatarPreview)
+        }
+    }, [avatarPreview])
+
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData(prev => ({
@@ -39,6 +46,14 @@ function RegisterPage() {
     const handleFileChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
+
+        const validationError = validateImageFile(file)
+        if (validationError) {
+            setError(validationError)
+            e.target.value = ''
+            return
+        }
+        setError('')
 
         setAvatarFile(file)
         setAvatarPreview(URL.createObjectURL(file))
@@ -112,10 +127,7 @@ function RegisterPage() {
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.field} style={{ textAlign: 'center' }}>
-                        <div
-                            onClick={handleAvatarClick}
-                            style={{ cursor: 'pointer', display: 'inline-block' }}
-                        >
+                        <button type="button" onClick={handleAvatarClick} aria-label="Выбрать аватар" style={{ cursor: 'pointer', display: 'inline-block', border: 0, background: 'none' }}>
                             {avatarPreview ? (
                                 // Avatar-компонент не умеет в blob: URL (он всегда клеит API_URL),
                                 // поэтому локальное превью рендерим обычным img напрямую
@@ -129,7 +141,7 @@ function RegisterPage() {
                             ) : (
                                 <Avatar avatarUrl={null} size={150} />
                             )}
-                        </div>
+                        </button>
                         <input
                             id="avatar-input"
                             ref={avatarInputRef}
@@ -141,8 +153,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Логин *</label>
+                        <label htmlFor="register-username">Логин *</label>
                         <input
+                            id="register-username"
                             type="text"
                             name="username"
                             value={formData.username}
@@ -153,8 +166,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Пароль *</label>
+                        <label htmlFor="register-password">Пароль *</label>
                         <input
+                            id="register-password"
                             type="password"
                             name="password"
                             value={formData.password}
@@ -165,8 +179,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Имя *</label>
+                        <label htmlFor="register-first-name">Имя *</label>
                         <input
+                            id="register-first-name"
                             type="text"
                             name="first_name"
                             value={formData.first_name}
@@ -177,8 +192,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Фамилия *</label>
+                        <label htmlFor="register-last-name">Фамилия *</label>
                         <input
+                            id="register-last-name"
                             type="text"
                             name="last_name"
                             value={formData.last_name}
@@ -189,8 +205,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Отчество</label>
+                        <label htmlFor="register-patronymic">Отчество</label>
                         <input
+                            id="register-patronymic"
                             type="text"
                             name="patronymic"
                             value={formData.patronymic}
@@ -200,8 +217,9 @@ function RegisterPage() {
                     </div>
 
                     <div className={styles.field}>
-                        <label>Дата рождения</label>
+                        <label htmlFor="register-birthday">Дата рождения</label>
                         <input
+                            id="register-birthday"
                             type="date"
                             name="birthday"
                             value={formData.birthday}
@@ -209,7 +227,7 @@ function RegisterPage() {
                         />
                     </div>
 
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && <div className={styles.error} role="alert">{error}</div>}
 
                     <button
                         type="submit"

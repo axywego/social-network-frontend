@@ -23,6 +23,12 @@
     color: var(--color-ink-faint);
 }
 
+.error {
+    color: var(--color-danger);
+    font-size: 13px;
+    margin-top: 10px;
+}
+
 .previewWrap {
     position: relative;
     margin-top: 12px;

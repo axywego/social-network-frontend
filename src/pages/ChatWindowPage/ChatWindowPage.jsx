@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
 import { useAuthContext } from '../../context/AuthContext'
 import ChatImage from '../../components/ChatImage'
 import Avatar from '../../components/Avatar'
+import { validateImageFile } from '../../utils/imageFile'
 import styles from './ChatWindowPage.module.css'
 
 const PAGE_SIZE = 30
@@ -15,7 +16,6 @@ const START_INDEX = 1_000_000
 
 // ─── Отдельный компонент сообщения ─────────────────────────────────────────
 function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }) {
-    const navigate = useNavigate();
     const longPressTimer = useRef(null)
     const touchMoved = useRef(false)
 
@@ -48,11 +48,10 @@ function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }
             className={`${styles.messageRow} ${isOwn ? styles.own : ''}`}
             style={showSenderInfo ? { display: 'flex', alignItems: 'flex-end', gap: 6 } : undefined}
         >
-            <div style={{cursor: "pointer"}} onClick={() => sender && navigate(`/users/${sender.id}`)} >
-              {showSenderInfo && (
-                  <Avatar avatarUrl={sender?.avatar_url} size={42} />
-              )}
-            </div>
+            {showSenderInfo && (sender
+                ? <Link to={`/users/${sender.id}`} aria-label={`Профиль: ${sender.first_name} ${sender.last_name}`}><Avatar avatarUrl={sender.avatar_url} size={42} /></Link>
+                : <Avatar avatarUrl={null} size={42} />
+            )}
             <div
                 className={styles.bubble}
                 onContextMenu={isOwn ? (e) => onContextMenu(e, message) : undefined}
@@ -195,6 +194,13 @@ function ChatWindowPage() {
     // Изображение, прикреплённое к полю ввода — общее и для нового сообщения, и для редактирования.
     // filename === null && присутствует => картинка убрана/ещё не выбрана.
     const [pendingImage, setPendingImage] = useState(null) // { filename, width, height, previewUrl, uploading } | null
+
+    useEffect(() => {
+        const previewUrl = pendingImage?.previewUrl
+        return () => {
+            if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
+        }
+    }, [pendingImage?.previewUrl])
 
     const textInputRef = useRef(null)
     const wsRef = useRef(null)
@@ -507,6 +513,13 @@ function ChatWindowPage() {
         e.target.value = '' // чтобы можно было выбрать тот же файл повторно
         if (!file) return
 
+        const validationError = validateImageFile(file)
+        if (validationError) {
+            setError(validationError)
+            return
+        }
+        setError(null)
+
         // локальный превью показываем сразу, не дожидаясь загрузки на сервер
         if (pendingImage?.previewUrl?.startsWith('blob:')) {
             URL.revokeObjectURL(pendingImage.previewUrl)
@@ -542,17 +555,10 @@ function ChatWindowPage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <button className={styles.backBtn} onClick={() => navigate('/chats')}>←</button>
-                <h2
-                    className={chatType === 'direct' ? styles.clickableTitle : undefined}
-                    onClick={() => {
-                        if (chatType === 'direct' && otherUserId) {
-                            navigate(`/users/${otherUserId}`)
-                        }
-                    }}
-                >
-                    {chatName}
-                </h2>
+                <button className={styles.backBtn} onClick={() => navigate('/chats')} aria-label="Назад к чатам">←</button>
+                <h2>{chatType === 'direct' && otherUserId
+                    ? <Link className={styles.clickableTitle} to={`/users/${otherUserId}`}>{chatName}</Link>
+                    : chatName}</h2>
                 {chatType === 'group' && (
                     <button className={styles.membersBtn} onClick={handleToggleMembers}>
                         👥 Участники
@@ -704,6 +710,7 @@ function ChatWindowPage() {
                             type="button"
                             onClick={handleCancelEdit}
                             title="Отменить редактирование"
+                            aria-label="Отменить редактирование"
                             style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 15, lineHeight: 1 }}
                         >
                             ✕
@@ -748,6 +755,7 @@ function ChatWindowPage() {
                                 type="button"
                                 onClick={handleRemoveImage}
                                 title="Убрать изображение"
+                                aria-label="Убрать изображение"
                                 style={{
                                     position: 'absolute',
                                     top: -6,
@@ -780,6 +788,7 @@ function ChatWindowPage() {
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
                         title={pendingImage ? 'Заменить изображение' : 'Прикрепить изображение'}
+                        aria-label={pendingImage ? 'Заменить изображение' : 'Прикрепить изображение'}
                     >
                         📎
                     </button>
@@ -790,7 +799,9 @@ function ChatWindowPage() {
                         onChange={handleImageChange}
                         style={{ display: 'none' }}
                     />
+                    <label className="visually-hidden" htmlFor="chat-message">Сообщение</label>
                     <input
+                        id="chat-message"
                         type="text"
                         ref={textInputRef}
                         value={text}

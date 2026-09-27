@@ -3,7 +3,8 @@
     top: var(--header-height, 60px);
     left: 0;
     right: 0;
-    bottom: 0;
+    height: calc(100dvh - var(--header-height, 60px));
+    bottom: auto;
     display: flex;
     flex-direction: column;
     max-width: 800px;
@@ -28,6 +29,10 @@
     font-weight: 600;
     color: var(--color-ink);
     margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .backBtn {
@@ -89,6 +94,7 @@
     margin-right: 10px;
     margin-left: 10px;
     max-width: 60%;
+    min-width: 0;
     padding: 10px 14px;
     border-radius: var(--radius-md);
     background: var(--color-surface);
@@ -126,7 +132,7 @@
 .inputBar {
     display: flex;
     gap: 10px;
-    padding: 14px 20px;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
     background: var(--color-surface);
     border-top: 1px solid var(--color-line);
     flex-shrink: 0;
@@ -153,6 +159,7 @@
 
 .textInput {
     flex: 1;
+    min-width: 0;
     padding: 10px 16px;
     border: 1px solid var(--color-line);
     border-radius: var(--radius-full);
@@ -295,6 +302,8 @@
 
 .clickableTitle {
     cursor: pointer;
+    color: inherit;
+    text-decoration: none;
 }
 
 .clickableTitle:hover {
@@ -317,6 +326,10 @@
 }
 
 @media (max-width: 480px) {
+    .header { padding: 12px; }
+    .bubble { max-width: 82%; }
+    .inputBar { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+    .sendBtn { padding-inline: 12px; }
     .sendBtnText {
         display: none;
     }

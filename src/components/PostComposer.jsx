@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { postService } from '../services/postService'
+import { validateImageFile } from '../utils/imageFile'
 import styles from './PostComposer.module.css'
 
 function PostComposer({ onPostCreated }) {
@@ -7,11 +8,25 @@ function PostComposer({ onPostCreated }) {
     const [imageFile, setImageFile] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
     const [posting, setPosting] = useState(false)
+    const [error, setError] = useState('')
     const fileInputRef = useRef(null)
+
+    useEffect(() => {
+        return () => {
+            if (imagePreview) URL.revokeObjectURL(imagePreview)
+        }
+    }, [imagePreview])
 
     const handleImageChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
+        const validationError = validateImageFile(file)
+        if (validationError) {
+            setError(validationError)
+            e.target.value = ''
+            return
+        }
+        setError('')
         setImageFile(file)
         setImagePreview(URL.createObjectURL(file))
     }
@@ -27,6 +42,7 @@ function PostComposer({ onPostCreated }) {
         if (!text.trim() && !imageFile) return
 
         setPosting(true)
+        setError('')
         try {
             let imageUrl = null
             if (imageFile) {
@@ -41,6 +57,7 @@ function PostComposer({ onPostCreated }) {
             onPostCreated?.()
         } catch (err) {
             console.error(err)
+            setError('Не удалось опубликовать пост. Попробуйте ещё раз.')
         } finally {
             setPosting(false)
         }
@@ -48,7 +65,9 @@ function PostComposer({ onPostCreated }) {
 
     return (
         <form className={styles.postForm} onSubmit={handleSubmit}>
+            <label className="visually-hidden" htmlFor="post-content">Текст поста</label>
             <textarea
+                id="post-content"
                 placeholder="Что нового?"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -58,9 +77,11 @@ function PostComposer({ onPostCreated }) {
             {imagePreview && (
                 <div className={styles.previewWrap}>
                     <img src={imagePreview} alt="preview" className={styles.preview} />
-                    <button type="button" className={styles.removePreview} onClick={handleRemoveImage}>✕</button>
+                    <button type="button" className={styles.removePreview} onClick={handleRemoveImage} aria-label="Убрать изображение">✕</button>
                 </div>
             )}
+
+            {error && <p className={styles.error} role="alert">{error}</p>}
 
             <div className={styles.formActions}>
                 <button type="button" className={styles.attachBtn} onClick={() => fileInputRef.current?.click()}>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { friendService } from '../../services/friendService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
@@ -10,7 +10,6 @@ const TABS = { FRIENDS: 'friends', INCOMING: 'incoming', OUTGOING: 'outgoing', S
 const SEARCH_LIMIT = 20
 
 function FriendsPage() {
-    const navigate = useNavigate()
     const { userId: routeUserId } = useParams()
     const { currentUser } = useAuthContext()
 
@@ -220,6 +219,7 @@ function FriendsPage() {
 
             {isOwnPage && (
                 <input
+                    aria-label="Поиск пользователей"
                     type="text"
                     className={styles.searchInput}
                     placeholder="Поиск по логину, имени или фамилии..."
@@ -249,13 +249,13 @@ function FriendsPage() {
                     {!searchLoading && searchResults.length === 0 && <p className={styles.empty}>Никого не найдено</p>}
                     {searchResults.map(user => (
                         <div key={user.id} className={styles.item}>
-                            <div className={styles.clickable} onClick={() => navigate(`/users/${user.id}`)}>
+                            <Link className={styles.clickable} to={`/users/${user.id}`}>
                                 <Avatar avatarUrl={user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{user.first_name} {user.last_name}</div>
                                     <div className={styles.username}>@{user.username}</div>
                                 </div>
-                            </div>
+                            </Link>
                             {renderActionButton(user)}
                         </div>
                     ))}
@@ -273,13 +273,13 @@ function FriendsPage() {
                     )}
                     {displayedFriends.map(friend => (
                         <div key={friend.id} className={styles.item}>
-                            <div className={styles.clickable} onClick={() => navigate(`/users/${friend.id}`)}>
+                            <Link className={styles.clickable} to={`/users/${friend.id}`}>
                                 <Avatar avatarUrl={friend.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{friend.first_name} {friend.last_name}</div>
                                     <div className={styles.username}>@{friend.username}</div>
                                 </div>
-                            </div>
+                            </Link>
                             {renderActionButton(friend)}
                         </div>
                     ))}
@@ -291,13 +291,13 @@ function FriendsPage() {
                     {incoming.length === 0 && <p className={styles.empty}>Нет входящих заявок</p>}
                     {incoming.map(req => (
                         <div key={req.user.id} className={styles.item}>
-                            <div className={styles.clickable} onClick={() => navigate(`/users/${req.user.id}`)}>
+                            <Link className={styles.clickable} to={`/users/${req.user.id}`}>
                                 <Avatar avatarUrl={req.user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
                                     <div className={styles.username}>@{req.user.username}</div>
                                 </div>
-                            </div>
+                            </Link>
                             <div className={styles.actions}>
                                 <button className={styles.acceptBtn} onClick={() => handleAccept(req.user.username)}>Принять</button>
                                 <button className={styles.declineBtn} onClick={() => handleDecline(req.user.username)}>Отклонить</button>
@@ -312,13 +312,13 @@ function FriendsPage() {
                     {outgoing.length === 0 && <p className={styles.empty}>Нет исходящих заявок</p>}
                     {outgoing.map(req => (
                         <div key={req.user.id} className={styles.item}>
-                            <div className={styles.clickable} onClick={() => navigate(`/users/${req.user.id}`)}>
+                            <Link className={styles.clickable} to={`/users/${req.user.id}`}>
                                 <Avatar avatarUrl={req.user.avatar_url} size={52} />
                                 <div className={styles.info}>
                                     <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
                                     <div className={styles.username}>@{req.user.username}</div>
                                 </div>
-                            </div>
+                            </Link>
                             <button className={styles.declineBtn} onClick={() => handleDecline(req.user.username)}>Отменить</button>
                         </div>
                     ))}
