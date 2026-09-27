@@ -27,7 +27,7 @@ function Header() {
         <header ref={headerRef} className={styles.header}>
             <div className={styles.inner}>
                 <NavLink to="/feed" className={styles.logo}>Coova</NavLink>
-                <nav className={styles.nav}>
+                <nav className={styles.nav} aria-label="Основная навигация">
                     <NavLink to="/feed" className={({ isActive }) => isActive ? styles.active : styles.link}>
                         Лента
                     </NavLink>
@@ -37,7 +37,7 @@ function Header() {
                     <NavLink to="/chats" className={({ isActive }) => isActive ? styles.active : styles.link}>
                         Чаты
                     </NavLink>
-                    <NavLink to="/profile" className={styles.profileLink}>
+                    <NavLink to="/profile" className={styles.profileLink} aria-label="Мой профиль">
                         <Avatar avatarUrl={currentUser.avatar_url} size={34} />
                     </NavLink>
                 </nav>
