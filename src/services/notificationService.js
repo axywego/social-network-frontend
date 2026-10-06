@@ -1,4 +1,4 @@
-import api, { API_URL } from './api'
+import { API_URL } from './api'
 
 export const notificationService = {
     connectToSever({ onEvent }) {

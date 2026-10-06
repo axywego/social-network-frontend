@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { MessageCircle, Plus, X } from 'lucide-react'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
 import { useNotifications } from '../../context/NotificationContext'
 import { useAuthContext } from '../../context/AuthContext'
-import styles from './ChatsPage.module.css'
 import Avatar from '../../components/Avatar'
+import Badge from '../../components/ui/Badge'
+import Button from '../../components/ui/Button'
+import Field from '../../components/ui/Field'
+import Alert from '../../components/ui/Alert'
+import Spinner from '../../components/ui/Spinner'
+import PageHeader from '../../components/ui/PageHeader'
+import EmptyState from '../../components/ui/EmptyState'
+import styles from './ChatsPage.module.css'
 
 function ChatsPage() {
     const navigate = useNavigate()
@@ -22,7 +30,6 @@ function ChatsPage() {
 
     useEffect(() => {
         loadChats()
-        console.log(currentUser.id)
         friendService.getFriends(currentUser.id).then(setFriends).catch(console.error)
     }, [])
 
@@ -50,10 +57,8 @@ function ChatsPage() {
     const loadChats = async () => {
         try {
             setLoading(true)
+            setError(null)
             const data = await chatService.getChats()
-            data.forEach(element => {
-                console.log(`${element.name}: ${element.unread_count}`)
-            });
             setChats(data)
         } catch (err) {
             setError('Не удалось загрузить чаты')
@@ -92,59 +97,100 @@ function ChatsPage() {
     }
 
     if (loading) {
-        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
+        return (
+            <div className={styles.container}>
+                <Spinner label="Загружаем чаты" />
+            </div>
+        )
     }
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
-                <h1>Чаты</h1>
-                <button className={styles.newGroupBtn} onClick={() => setShowCreateGroup(v => !v)}>
-                    + Новая группа
-                </button>
-            </div>
+            <PageHeader
+                title="Чаты"
+                subtitle="Личные переписки и группы"
+                action={
+                    <Button
+                        variant={showCreateGroup ? 'ghost' : 'primary'}
+                        size="sm"
+                        icon={showCreateGroup ? X : Plus}
+                        onClick={() => setShowCreateGroup(v => !v)}
+                    >
+                        {showCreateGroup ? 'Отмена' : 'Новая группа'}
+                    </Button>
+                }
+            />
 
-            {error && <div className={styles.error}>{error}</div>}
+            {error && <Alert>{error}</Alert>}
 
             {showCreateGroup && (
                 <form className={styles.groupForm} onSubmit={handleCreateGroup}>
-                    <input
-                        type="text"
-                        placeholder="Название группы"
+                    <Field
+                        label="Название группы"
+                        placeholder="Например, «Команда»"
                         value={groupName}
                         onChange={(e) => setGroupName(e.target.value)}
                         required
+                        controlClassName={styles.groupInput}
                     />
-                    <button type="submit">Создать</button>
+                    <Button type="submit" variant="primary">
+                        Создать
+                    </Button>
                 </form>
             )}
 
             <div className={styles.chatList}>
-                {chats.length === 0 && <p className={styles.empty}>У вас пока нет чатов</p>}
+                {chats.length === 0 && (
+                    <EmptyState
+                        icon={MessageCircle}
+                        title="Чатов пока нет"
+                        description="Создайте группу или начните переписку с другом из раздела «Друзья»."
+                    />
+                )}
+
                 {chats.map(chat => (
-                    <div key={chat.chat_id} className={styles.chatItem} onClick={() => navigate(`/chats/${chat.chat_id}`)}>
-                        <Avatar avatarUrl={chat.avatar_url} size={40} />
+                    <button
+                        key={chat.chat_id}
+                        type="button"
+                        className={styles.chatItem}
+                        onClick={() => navigate(`/chats/${chat.chat_id}`)}
+                    >
+                        <Avatar avatarUrl={chat.avatar_url} size={46} />
                         <div className={styles.chatInfo}>
-                            <div className={styles.chatName}>{chat.name}</div>
-                            <div className={styles.lastMessage}>{chat.last_message}</div>
+                            <span className={styles.chatName}>{chat.name}</span>
+                            <span className={styles.lastMessage}>
+                                {chat.last_message || 'Нет сообщений'}
+                            </span>
                         </div>
-                        {chat.unread_count > 0 && (
-                            <span className={styles.unreadBadge}>{chat.unread_count}</span>
-                        )}
-                    </div>
+                        {chat.unread_count > 0 && <Badge tone="brand">{chat.unread_count}</Badge>}
+                    </button>
                 ))}
             </div>
 
-            {/* <h2 className={styles.usersTitle}>Начать переписку с другом</h2>
-            <div className={styles.usersList}>
-                {friends.length === 0 && <p className={styles.empty}>Добавьте друзей, чтобы начать переписку</p>}
-                {friends.map(friend => (
-                    <div key={friend.id} className={styles.userItem} onClick={() => handleStartDirectChat(friend.id)}>
-                        <Avatar avatarUrl={friend.avatar_url} size={38}/>
-                        <span>{friend.first_name} {friend.last_name}</span>
+            <section className={styles.friendsSection}>
+                <h2 className={styles.friendsTitle}>Начать переписку</h2>
+                {friends.length === 0 ? (
+                    <p className={styles.friendsEmpty}>
+                        Добавьте друзей, чтобы начать переписку
+                    </p>
+                ) : (
+                    <div className={styles.friendList}>
+                        {friends.map(friend => (
+                            <button
+                                key={friend.id}
+                                type="button"
+                                className={styles.friendItem}
+                                onClick={() => handleStartDirectChat(friend.id)}
+                            >
+                                <Avatar avatarUrl={friend.avatar_url} size={36} />
+                                <span className={styles.friendName}>
+                                    {friend.first_name} {friend.last_name}
+                                </span>
+                            </button>
+                        ))}
                     </div>
-                ))}
-            </div> */}
+                )}
+            </section>
         </div>
     )
 }

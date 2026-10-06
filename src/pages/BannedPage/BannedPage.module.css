@@ -1,0 +1,36 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+}
+
+.iconWrap {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    background: var(--danger-tint);
+}
+
+.icon {
+    width: 26px;
+    height: 26px;
+    color: var(--danger);
+}
+
+.reason {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.hint {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+}

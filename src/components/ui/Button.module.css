@@ -1,0 +1,133 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+        background var(--dur-fast) var(--ease),
+        border-color var(--dur-fast) var(--ease),
+        color var(--dur-fast) var(--ease),
+        box-shadow var(--dur-base) var(--ease),
+        transform var(--dur-fast) var(--ease);
+}
+
+.button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.button:disabled {
+    opacity: 0.45;
+}
+
+/* ---- Sizes ---- */
+
+.sm {
+    padding: 6px 12px;
+    font-size: var(--text-sm);
+}
+
+.md {
+    padding: 9px 18px;
+    font-size: var(--text-base);
+}
+
+.lg {
+    padding: 13px 26px;
+    font-size: var(--text-md);
+}
+
+/* Square pill for icon-only actions. Declared after the size blocks so
+   the zeroed padding wins on source order; callers must supply an
+   aria-label and a title, since there is no visible text. */
+.iconOnly {
+    padding: 0;
+    gap: 0;
+    width: 2.5em;
+    aspect-ratio: 1;
+}
+
+.iconOnly.sm {
+    width: 2em;
+}
+
+.iconOnly.lg {
+    width: 2.6em;
+}
+
+.block {
+    display: flex;
+    width: 100%;
+}
+
+/* Long labels inside a constrained flex parent (profile action rows)
+   ellipsize instead of overflowing the glass pill. */
+.label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.icon {
+    width: 1.1em;
+    height: 1.1em;
+    flex-shrink: 0;
+}
+
+.sm .icon { width: 1em; height: 1em; }
+.lg .icon { width: 1.15em; height: 1.15em; }
+
+/* ---- Variants ---- */
+
+.primary {
+    background: var(--green);
+    color: var(--green-on);
+    box-shadow: 0 6px 18px -8px var(--green);
+}
+
+.primary:hover:not(:disabled) {
+    background: var(--green-deep);
+    box-shadow: 0 10px 24px -8px var(--green);
+}
+
+/* Secondary is itself a pane of glass. */
+.secondary {
+    background: var(--glass-tint-quiet);
+    backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+    border-color: var(--glass-ring);
+    color: var(--ink);
+    box-shadow: var(--glass-shadow);
+}
+
+.secondary:hover:not(:disabled) {
+    background: var(--glass-tint-strong);
+    border-color: var(--green-tint-strong);
+    color: var(--green);
+}
+
+.ghost {
+    background: transparent;
+    color: var(--ink-soft);
+}
+
+.ghost:hover:not(:disabled) {
+    background: var(--green-tint);
+    color: var(--green);
+}
+
+.danger {
+    background: var(--danger-tint);
+    color: var(--danger);
+    border-color: transparent;
+}
+
+.danger:hover:not(:disabled) {
+    background: var(--danger-tint-hover);
+}

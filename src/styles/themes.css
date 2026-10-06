@@ -1,0 +1,324 @@
+/* ============================================================
+   Theme palettes
+   ------------------------------------------------------------
+   `tokens.css` holds the structural tokens (type, radii, spacing,
+   layout, motion) plus the `:root` palette, which is the "day"
+   theme and the pre-script default. This file carries every other
+   palette as an override on `<html data-theme="…">`.
+
+   A theme only redeclares PALETTE + GLASS tokens. Anything
+   structural stays in tokens.css, so adding a theme here never
+   means touching a component.
+
+   `--green*` is the *accent* slot, not a literal colour: components
+   reference it by role, which is what lets the accent travel across
+   the whole UI when the user switches theme.
+
+   The default `day` palette lives on `:root` in tokens.css; the
+   `system` preference is resolved to a concrete theme in JS
+   (ThemeContext), so no `prefers-color-scheme` block is needed here.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   night — the dark counterpart to `day`: same green, inverted.
+   ------------------------------------------------------------ */
+:root[data-theme='night'] {
+    color-scheme: dark;
+
+    --canvas: #0A100C;
+    --canvas-deep: #060B08;
+    --surface: #121B15;
+    --surface-alt: #16211A;
+    --surface-sunken: #0E1711;
+
+    --ink: #E8F1EA;
+    --ink-soft: #9DB0A4;
+    --ink-faint: #6E8276;
+
+    --green: #4FC98A;
+    --green-deep: #37A96C;
+    --green-bright: #6FE0A6;
+    --green-tint: #14291E;
+    --green-tint-strong: #1B3A29;
+    --green-on: #06120C;
+
+    --danger: #F08A78;
+    --danger-tint: #2C1613;
+    --danger-tint-hover: #3A1D19;
+    --warning: #E0B45C;
+    --warning-tint: #2B2013;
+    --success: #4FC98A;
+
+    --line: #233028;
+    --line-soft: #1A241D;
+    --line-strong: #33453A;
+
+    /* Dark glass gains contrast instead of whitening. */
+    --glass-tint: rgba(22, 33, 26, 0.66);
+    --glass-tint-strong: rgba(26, 38, 30, 0.86);
+    --glass-tint-quiet: rgba(18, 27, 21, 0.44);
+    --glass-sat: 140%;
+    --glass-ring: rgba(255, 255, 255, 0.12);
+    --glass-specular: rgba(255, 255, 255, 0.22);
+    --glass-sheen: rgba(255, 255, 255, 0.05);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px -14px rgba(0, 0, 0, 0.7);
+    --glass-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.55), 0 18px 44px -16px rgba(0, 0, 0, 0.8);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.85);
+}
+
+/* ------------------------------------------------------------
+   mist — pale, cool and quiet. For reading-heavy sessions.
+   ------------------------------------------------------------ */
+:root[data-theme='mist'] {
+    color-scheme: light;
+
+    --canvas: #EAEFF4;
+    --canvas-deep: #DBE3EB;
+    --surface: #FFFFFF;
+    --surface-alt: #F5F8FB;
+    --surface-sunken: #EDF2F7;
+
+    --ink: #0E1620;
+    --ink-soft: #52616F;
+    --ink-faint: #8695A3;
+
+    --green: #2C5F8A;
+    --green-deep: #1E4767;
+    --green-bright: #4A8FC4;
+    --green-tint: #E1EBF4;
+    --green-tint-strong: #C6DAEC;
+    --green-on: #FFFFFF;
+
+    --danger: #A63A32;
+    --danger-tint: #F6E4E2;
+    --danger-tint-hover: #EDD0CD;
+    --warning: #8A6516;
+    --warning-tint: #F6EDD9;
+    --success: #2C5F8A;
+
+    --line: #D6DFE8;
+    --line-soft: #E7EDF3;
+    --line-strong: #BAC9D6;
+
+    --glass-tint: rgba(255, 255, 255, 0.64);
+    --glass-tint-strong: rgba(255, 255, 255, 0.84);
+    --glass-tint-quiet: rgba(255, 255, 255, 0.44);
+    --glass-sat: 160%;
+    --glass-ring: rgba(255, 255, 255, 0.72);
+    --glass-specular: rgba(255, 255, 255, 0.92);
+    --glass-sheen: rgba(203, 220, 234, 0.34);
+    --glass-shadow: 0 1px 2px rgba(14, 22, 32, 0.05), 0 10px 28px -14px rgba(14, 22, 32, 0.24);
+    --glass-shadow-lift: 0 2px 4px rgba(14, 22, 32, 0.06), 0 18px 44px -16px rgba(14, 22, 32, 0.3);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(14, 22, 32, 0.36);
+}
+
+/* ------------------------------------------------------------
+   peach — warm daylight. Low contrast between surfaces keeps it
+   soft, so the accent carries the hierarchy.
+   ------------------------------------------------------------ */
+:root[data-theme='peach'] {
+    color-scheme: light;
+
+    --canvas: #F8F0EA;
+    --canvas-deep: #F0E1D7;
+    --surface: #FFFFFF;
+    --surface-alt: #FBF5F1;
+    --surface-sunken: #F6EBE3;
+
+    --ink: #1E1410;
+    --ink-soft: #6B5449;
+    --ink-faint: #A08D81;
+
+    --green: #A25131;
+    --green-deep: #94462A;
+    --green-bright: #DB7D55;
+    --green-tint: #F9E7DC;
+    --green-tint-strong: #F1CFBE;
+    --green-on: #FFFFFF;
+
+    --danger: #A32F27;
+    --danger-tint: #F9E1DD;
+    --danger-tint-hover: #F1CBC5;
+    --warning: #8A5E12;
+    --warning-tint: #F8EBD3;
+    --success: #4C7A3A;
+
+    --line: #E9DACE;
+    --line-soft: #F3E8DE;
+    --line-strong: #D8C1AF;
+
+    --glass-tint: rgba(255, 253, 251, 0.66);
+    --glass-tint-strong: rgba(255, 253, 251, 0.86);
+    --glass-tint-quiet: rgba(255, 250, 246, 0.46);
+    --glass-sat: 165%;
+    --glass-ring: rgba(255, 255, 255, 0.74);
+    --glass-specular: rgba(255, 255, 255, 0.94);
+    --glass-sheen: rgba(240, 205, 184, 0.32);
+    --glass-shadow: 0 1px 2px rgba(30, 20, 16, 0.05), 0 10px 28px -14px rgba(30, 20, 16, 0.24);
+    --glass-shadow-lift: 0 2px 4px rgba(30, 20, 16, 0.06), 0 18px 44px -16px rgba(30, 20, 16, 0.3);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(30, 20, 16, 0.36);
+}
+
+/* ------------------------------------------------------------
+   ocean — deep and cool. Blur is pushed harder here because the
+   canvas is dark enough to carry it.
+   ------------------------------------------------------------ */
+:root[data-theme='ocean'] {
+    color-scheme: dark;
+
+    --canvas: #081019;
+    --canvas-deep: #04090F;
+    --surface: #0F1C27;
+    --surface-alt: #13232F;
+    --surface-sunken: #0B1720;
+
+    --ink: #E4EFF6;
+    --ink-soft: #93A9B8;
+    --ink-faint: #63798A;
+
+    --green: #38A8C9;
+    --green-deep: #2687A6;
+    --green-bright: #5FCBE6;
+    --green-tint: #0D2A35;
+    --green-tint-strong: #144150;
+    --green-on: #041016;
+
+    --danger: #F08279;
+    --danger-tint: #2C1614;
+    --danger-tint-hover: #3B1E1B;
+    --warning: #DFB45F;
+    --warning-tint: #2A2113;
+    --success: #45C08C;
+
+    --line: #1C303E;
+    --line-soft: #14242F;
+    --line-strong: #2A4557;
+
+    --glass-tint: rgba(19, 35, 47, 0.64);
+    --glass-tint-strong: rgba(22, 41, 55, 0.85);
+    --glass-tint-quiet: rgba(15, 28, 39, 0.42);
+    --glass-blur: 24px;
+    --glass-sat: 150%;
+    --glass-ring: rgba(160, 214, 236, 0.14);
+    --glass-specular: rgba(190, 232, 248, 0.24);
+    --glass-sheen: rgba(95, 203, 230, 0.06);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px -14px rgba(0, 0, 0, 0.7);
+    --glass-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.55), 0 18px 44px -16px rgba(0, 0, 0, 0.8);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.85);
+}
+
+/* ------------------------------------------------------------
+   sunset — warm dark. The amber accent is deliberately close to
+   the canvas so the UI reads as one warm mass, with the glass
+   rings doing the separation.
+   ------------------------------------------------------------ */
+:root[data-theme='sunset'] {
+    color-scheme: dark;
+
+    --canvas: #150E12;
+    --canvas-deep: #0D080B;
+    --surface: #1F1519;
+    --surface-alt: #271A1F;
+    --surface-sunken: #181014;
+
+    --ink: #F7EAE5;
+    --ink-soft: #C0A199;
+    --ink-faint: #8D736A;
+
+    --green: #E0763F;
+    --green-deep: #C25C2A;
+    --green-bright: #F4A06D;
+    --green-tint: #2F1A11;
+    --green-tint-strong: #452617;
+    --green-on: #170A05;
+
+    --danger: #F0836F;
+    --danger-tint: #2E1613;
+    --danger-tint-hover: #3D1F1A;
+    --warning: #E8B761;
+    --warning-tint: #2C2112;
+    --success: #6FBF7E;
+
+    --line: #34222A;
+    --line-soft: #261820;
+    --line-strong: #4B3039;
+
+    --glass-tint: rgba(34, 22, 27, 0.66);
+    --glass-tint-strong: rgba(42, 27, 33, 0.86);
+    --glass-tint-quiet: rgba(28, 18, 23, 0.44);
+    --glass-blur: 22px;
+    --glass-sat: 155%;
+    --glass-ring: rgba(255, 214, 190, 0.13);
+    --glass-specular: rgba(255, 226, 205, 0.24);
+    --glass-sheen: rgba(244, 160, 109, 0.07);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px -14px rgba(0, 0, 0, 0.72);
+    --glass-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.55), 0 18px 44px -16px rgba(0, 0, 0, 0.8);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.86);
+}
+
+/* ------------------------------------------------------------
+   graphite — neutral. The accent is near-monochrome on purpose;
+   feedback hues stay saturated so status never becomes ambiguous.
+   ------------------------------------------------------------ */
+:root[data-theme='graphite'] {
+    color-scheme: dark;
+
+    --canvas: #0C0C0E;
+    --canvas-deep: #070709;
+    --surface: #141417;
+    --surface-alt: #1A1A1E;
+    --surface-sunken: #101013;
+
+    --ink: #EDEDF0;
+    --ink-soft: #A0A0A9;
+    --ink-faint: #71717B;
+
+    --green: #C9C9D2;
+    --green-deep: #A9A9B5;
+    --green-bright: #E3E3E9;
+    --green-tint: #1E1E23;
+    --green-tint-strong: #2B2B32;
+    --green-on: #101014;
+
+    --danger: #E0776B;
+    --danger-tint: #2A1715;
+    --danger-tint-hover: #391E1B;
+    --warning: #D9A441;
+    --warning-tint: #292113;
+    --success: #5FBF8B;
+
+    --line: #24242A;
+    --line-soft: #1A1A1F;
+    --line-strong: #37373F;
+
+    /* Minimal saturation boost: blur alone would wash the
+       near-neutral tints into flat grey. */
+    --glass-tint: rgba(26, 26, 30, 0.64);
+    --glass-tint-strong: rgba(30, 30, 35, 0.86);
+    --glass-tint-quiet: rgba(22, 22, 26, 0.44);
+    --glass-sat: 110%;
+    --glass-ring: rgba(255, 255, 255, 0.11);
+    --glass-specular: rgba(255, 255, 255, 0.2);
+    --glass-sheen: rgba(255, 255, 255, 0.045);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 10px 28px -14px rgba(0, 0, 0, 0.75);
+    --glass-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.6), 0 18px 44px -16px rgba(0, 0, 0, 0.85);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.9);
+}
+
+/* ------------------------------------------------------------
+   Theme transition
+   Applied only while a switch is in flight (`data-switching` is
+   set by ThemeContext, then removed) so the app never animates
+   its own colours on first paint.
+   ------------------------------------------------------------ */
+:root[data-switching] *,
+:root[data-switching] *::before,
+:root[data-switching] *::after {
+    transition:
+        background-color var(--dur-slow) var(--ease),
+        border-color var(--dur-slow) var(--ease),
+        color var(--dur-slow) var(--ease),
+        fill var(--dur-slow) var(--ease),
+        stroke var(--dur-slow) var(--ease),
+        box-shadow var(--dur-slow) var(--ease) !important;
+}

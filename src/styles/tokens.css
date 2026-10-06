@@ -1,77 +1,138 @@
+/* ============================================================
+   Coova design tokens
+   Single source of truth. Every value below is consumed by the
+   reset (index.css), the shared primitives and the page modules.
+   Nothing here may reference a component.
+
+   This file holds STRUCTURE (type, radii, spacing, layout, motion,
+   layers) plus the default palette on `:root`, which is the `day`
+   theme. Alternate palettes live in themes.css as
+   `<html data-theme="…">` overrides — they redeclare palette and
+   glass tokens only, never the structural ones below.
+   ============================================================ */
+
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-    --color-canvas: #F1F0EA;
-    --color-surface: #FFFFFF;
-    --color-surface-alt: #FAF9F4;
-    --color-ink: #22261F;
-    --color-ink-soft: #666C5F;
-    --color-ink-faint: #9B9F92;
-    --color-moss: #3F6B4A;
-    --color-moss-deep: #2E4F37;
-    --color-moss-tint: #E7EFE7;
-    --color-plum: #A6435A;
-    --color-plum-tint: #F5E6E9;
-    --color-danger: #B3402E;
-    --color-danger-tint: #F5E2DC;
-    --color-line: #E3E0D6;
-    --color-line-soft: #EDEBE2;
+    color-scheme: light;
 
+    /* ---- Surfaces & ink (`day` palette: white + green) ---- */
+    --canvas: #EDF2ED;
+    --canvas-deep: #E2EAE3;
+    --surface: #FFFFFF;
+    --surface-alt: #F6F9F6;
+    --surface-sunken: #EFF4EF;
+
+    --ink: #101A14;
+    --ink-soft: #56685C;
+    --ink-faint: #8E9F94;
+
+    /* ---- Brand: green ---- */
+    --green: #2E774D;
+    --green-deep: #1F5C3A;
+    --green-bright: #43B37A;
+    --green-tint: #E1F0E6;
+    --green-tint-strong: #CBE6D5;
+    --green-on: #FFFFFF;
+
+    /* ---- Feedback ---- */
+    --danger: #B23A2C;
+    --danger-tint: #F7E4E0;
+    --danger-tint-hover: #EFD2CC;
+    --warning: #8E6213;
+    --warning-tint: #F8EED8;
+    --success: #2E774D;
+
+    /* ---- Lines ---- */
+    --line: #DBE4DD;
+    --line-soft: #E9EFEA;
+    --line-strong: #C3D2C7;
+
+    /* ============================================================
+       Liquid glass
+       A glass surface is four stacked layers:
+         1. translucent tint      (--glass-tint)
+         2. backdrop blur+saturate(--glass-blur / --glass-sat)
+         3. outer hairline ring   (--glass-ring)
+         4. specular top edge     (--glass-specular)
+       Compose with the `.glass-surface` utility so it is defined
+       exactly once instead of copy-pasted per component.
+       ============================================================ */
+    --glass-tint: rgba(255, 255, 255, 0.62);
+    --glass-tint-strong: rgba(255, 255, 255, 0.82);
+    --glass-tint-quiet: rgba(255, 255, 255, 0.42);
+    --glass-blur: 20px;
+    --glass-sat: 170%;
+    --glass-ring: rgba(255, 255, 255, 0.7);
+    --glass-specular: rgba(255, 255, 255, 0.9);
+    --glass-sheen: rgba(255, 255, 255, 0.34);
+    /* Shadows carry a green cast so glass sits on the palette,
+       not on neutral grey. */
+    --glass-shadow: 0 1px 2px rgba(16, 26, 20, 0.04), 0 10px 28px -14px rgba(16, 26, 20, 0.22);
+    --glass-shadow-lift: 0 2px 4px rgba(16, 26, 20, 0.05), 0 18px 44px -16px rgba(16, 26, 20, 0.3);
+    --glass-shadow-pop: 0 24px 60px -18px rgba(16, 26, 20, 0.38);
+
+    /* ---- Typography ---- */
     --font-display: 'Unbounded', system-ui, sans-serif;
     --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-    --radius-sm: 8px;
+    --text-xs: 0.75rem;    /* 12px */
+    --text-sm: 0.8125rem;  /* 13px */
+    --text-base: 0.9375rem;/* 15px */
+    --text-md: 1rem;       /* 16px */
+    --text-lg: 1.125rem;   /* 18px */
+    --text-xl: 1.375rem;   /* 22px */
+    --text-2xl: 1.75rem;   /* 28px */
+
+    /* ---- Radii ---- */
+    --radius-xs: 6px;
+    --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 20px;
+    --radius-xl: 28px;
     --radius-full: 999px;
 
-    --shadow-card: 0 1px 2px rgba(34, 38, 31, 0.04), 0 8px 24px -12px rgba(34, 38, 31, 0.12);
-    --shadow-pop: 0 12px 32px -8px rgba(34, 38, 31, 0.22);
+    /* ---- Spacing ---- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* ---- Layout ---- */
+    --shell-max: 1280px;
+    --column-feed: 760px;
+    --column-wide: 900px;
+    --header-height: 64px;
+    /* Height the nav occupies at the bottom of the viewport. Zero while
+       the nav sits inline in the top bar; set below the nav breakpoint.
+       Media queries cannot read custom properties, so the 700px below
+       must be kept in sync with Header.module.css. */
+    --nav-bar-height: 0px;
+
+    /* ---- Motion ---- */
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 120ms;
+    --dur-base: 200ms;
+    --dur-slow: 320ms;
+
+    /* ---- Layers ---- */
+    --z-header: 40;
+    --z-dropdown: 60;
+    --z-modal: 80;
+    --z-toast: 100;
 }
 
-body {
-    background: var(--color-canvas);
-    font-family: var(--font-body);
-    color: var(--color-ink);
-    -webkit-font-smoothing: antialiased;
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-:where(a, button, input, textarea):focus-visible {
-    outline: 3px solid var(--color-moss);
-    outline-offset: 3px;
-}
-
-.auth-recovery {
-    min-height: 100dvh;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 24px;
-    text-align: center;
-}
-
-.auth-recovery p { flex-basis: 100%; }
-.auth-recovery button {
-    padding: 10px 18px;
-    border: 1px solid var(--color-moss);
-    border-radius: var(--radius-full);
-    background: var(--color-surface);
-    color: var(--color-moss-deep);
-    cursor: pointer;
-    font: inherit;
+/* The nav leaves the header row and docks to the bottom edge here.
+   Keep this breakpoint identical to the one in Header.module.css. */
+@media (max-width: 700px) {
+    :root {
+        --nav-bar-height: 58px;
+    }
 }

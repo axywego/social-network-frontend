@@ -1,0 +1,88 @@
+/* ============================================================
+   Liquid glass surfaces
+   The four glass layers (tint / blur / ring / specular) are
+   declared here exactly once and reused via the `.glass-surface`
+   utility and the <GlassCard> primitive. Do not re-implement
+   these gradients inside a component module — it is what made
+   the previous stylesheet drift out of sync.
+   ============================================================ */
+
+.glass-surface {
+    position: relative;
+    background: var(--glass-tint);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    border: 1px solid var(--glass-ring);
+    box-shadow: var(--glass-shadow);
+    isolation: isolate;
+}
+
+/* Specular sheen: a diagonal highlight in the upper-left, the
+   tell-tale reflection of a curved glass edge. */
+.glass-surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+        140deg,
+        var(--glass-sheen) 0%,
+        transparent 38%,
+        transparent 62%,
+        var(--glass-sheen) 100%
+    );
+}
+
+/* Inner light line along the top edge — reads as thickness. */
+.glass-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+        inset 0 1px 0 var(--glass-specular),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Variants ------------------------------------------------------------- */
+
+.glass-surface--strong {
+    background: var(--glass-tint-strong);
+}
+
+.glass-surface--quiet {
+    background: var(--glass-tint-quiet);
+    backdrop-filter: blur(calc(var(--glass-blur) * 0.6)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6)) saturate(var(--glass-sat));
+}
+
+.glass-surface--lift {
+    box-shadow: var(--glass-shadow-lift);
+}
+
+/* Interactive glass: the specular edge tightens on hover, which
+   looks like the surface catching light. */
+.glass-surface--interactive {
+    transition:
+        box-shadow var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease);
+}
+
+.glass-surface--interactive:hover {
+    transform: translateY(-2px);
+    border-color: var(--green-tint-strong);
+    box-shadow: var(--glass-shadow-lift);
+}
+
+/* Fallback for engines without backdrop-filter: an opaque-ish
+   tint still reads as a surface rather than collapsing. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-surface {
+        background: var(--glass-tint-strong);
+    }
+}

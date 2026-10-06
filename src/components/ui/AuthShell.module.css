@@ -1,0 +1,151 @@
+.page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-5);
+}
+
+.card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 880px;
+    overflow: hidden;
+}
+
+/* ---- Brand panel (desktop only) ---- */
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-8);
+    border-right: 1px solid var(--glass-ring);
+    /* Tint the brand side green so the form side reads as clean glass. */
+    background: linear-gradient(160deg, var(--green-tint) 0%, transparent 70%);
+}
+
+.brandTop,
+.panelBrand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    background: linear-gradient(140deg, var(--green-bright), var(--green-deep));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 6px 16px -6px var(--green);
+}
+
+.wordmark {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.tagline {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ink);
+}
+
+.points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: auto;
+}
+
+.point {
+    position: relative;
+    padding-left: var(--space-5);
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+}
+
+.point::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px var(--green-tint);
+}
+
+/* ---- Form panel ---- */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-8);
+}
+
+.panelBrand {
+    display: none;
+}
+
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.title {
+    font-size: var(--text-xl);
+}
+
+.subtitle {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+}
+
+.footer {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    text-align: center;
+}
+
+.footer a {
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 780px) {
+    .card {
+        grid-template-columns: 1fr;
+        max-width: 440px;
+    }
+
+    .brand {
+        display: none;
+    }
+
+    .panelBrand {
+        display: flex;
+    }
+
+    .panel {
+        padding: var(--space-6) var(--space-5);
+    }
+}

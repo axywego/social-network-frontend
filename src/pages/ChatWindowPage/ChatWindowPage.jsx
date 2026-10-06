@@ -1,11 +1,26 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
+import {
+    ArrowLeft,
+    Check,
+    Paperclip,
+    Pencil,
+    Send,
+    Trash2,
+    UserMinus,
+    UserPlus,
+    Users,
+    X,
+} from 'lucide-react'
 import { chatService } from '../../services/chatService'
 import { friendService } from '../../services/friendService'
 import { useAuthContext } from '../../context/AuthContext'
 import ChatImage from '../../components/ChatImage'
 import Avatar from '../../components/Avatar'
+import Button from '../../components/ui/Button'
+import Alert from '../../components/ui/Alert'
+import Spinner from '../../components/ui/Spinner'
 import { validateImageFile } from '../../utils/imageFile'
 import styles from './ChatWindowPage.module.css'
 
@@ -44,13 +59,10 @@ function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }
     }
 
     return (
-        <div
-            className={`${styles.messageRow} ${isOwn ? styles.own : ''}`}
-            style={showSenderInfo ? { display: 'flex', alignItems: 'flex-end', gap: 6 } : undefined}
-        >
+        <div className={`${styles.messageRow} ${isOwn ? styles.own : ''} ${showSenderInfo ? styles.withSender : ''}`}>
             {showSenderInfo && (sender
-                ? <Link to={`/users/${sender.id}`} aria-label={`Профиль: ${sender.first_name} ${sender.last_name}`}><Avatar avatarUrl={sender.avatar_url} size={42} /></Link>
-                : <Avatar avatarUrl={null} size={42} />
+                ? <Link to={`/users/${sender.id}`} aria-label={`Профиль: ${sender.first_name} ${sender.last_name}`}><Avatar avatarUrl={sender.avatar_url} size={34} /></Link>
+                : <Avatar avatarUrl={null} size={34} />
             )}
             <div
                 className={styles.bubble}
@@ -58,17 +70,16 @@ function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
             >
                 {showSenderInfo && (
-                    <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, opacity: 0.85 }}>
+                    <div className={styles.senderName}>
                         {sender ? `${sender.first_name} ${sender.last_name}` : 'Участник вышел из группы'}
                     </div>
                 )}
                 {message.image_url && <ChatImage imageUrl={message.image_url} className={styles.image} width={message.image_width} height={message.image_height} />}
                 {message.content && <div className={styles.text}>{message.content}</div>}
                 <div className={styles.time}>
-                    {message.is_edited && <span style={{ opacity: 0.6, marginRight: 4 }}>изменено</span>}
+                    {message.is_edited && <span className={styles.edited}>изменено</span>}
                     {new Date(message.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                 </div>
             </div>
@@ -102,42 +113,32 @@ function MessageContextMenu({ x, y, onEdit, onDelete, onClose }) {
 
     // Не даём попапу вылезти за правый/нижний край экрана
     const style = {
-        position: 'fixed',
-        top: Math.min(y, window.innerHeight - 90),
-        left: Math.min(x, window.innerWidth - 170),
-        zIndex: 1000,
-        minWidth: 160,
-        background: 'var(--menu-bg, #fff)',
-        borderRadius: 10,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
-        overflow: 'hidden',
-        userSelect: 'none',
-    }
-    const itemStyle = {
-        padding: '10px 16px',
-        fontSize: 14,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
+        top: Math.min(y, window.innerHeight - 110),
+        left: Math.min(x, window.innerWidth - 190),
     }
 
     return (
-        <div ref={menuRef} style={style}>
-            <div
-                style={itemStyle}
+        <div ref={menuRef} className={styles.contextMenu} style={style} role="menu">
+            <button
+                type="button"
+                className={styles.contextItem}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={onEdit}
+                role="menuitem"
             >
-                ✏️ Редактировать
-            </div>
-            <div
-                style={{ ...itemStyle, color: '#e53935' }}
+                <Pencil aria-hidden="true" />
+                Редактировать
+            </button>
+            <button
+                type="button"
+                className={`${styles.contextItem} ${styles.contextItemDanger}`}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={onDelete}
+                role="menuitem"
             >
-                🗑️ Удалить
-            </div>
+                <Trash2 aria-hidden="true" />
+                Удалить
+            </button>
         </div>
     )
 }
@@ -546,36 +547,61 @@ function ChatWindowPage() {
     }
 
     if (loading) {
-        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
+        return (
+            <div className={styles.container}>
+                <Spinner label="Открываем чат" />
+            </div>
+        )
     }
 
     const memberIds = new Set(members.map(m => m.id))
     const availableFriends = friends.filter(f => !memberIds.has(f.id))
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} data-fullbleed>
             <div className={styles.header}>
-                <button className={styles.backBtn} onClick={() => navigate('/chats')} aria-label="Назад к чатам">←</button>
-                <h2>{chatType === 'direct' && otherUserId
-                    ? <Link className={styles.clickableTitle} to={`/users/${otherUserId}`}>{chatName}</Link>
-                    : chatName}</h2>
+                <button
+                    className={styles.backBtn}
+                    onClick={() => navigate('/chats')}
+                    aria-label="Назад к чатам"
+                >
+                    <ArrowLeft aria-hidden="true" />
+                </button>
+
+                <h2 className={styles.headerTitle}>
+                    {chatType === 'direct' && otherUserId
+                        ? <Link className={styles.clickableTitle} to={`/users/${otherUserId}`}>{chatName}</Link>
+                        : chatName}
+                </h2>
+
                 {chatType === 'group' && (
-                    <button className={styles.membersBtn} onClick={handleToggleMembers}>
-                        👥 Участники
+                    <button
+                        className={`${styles.membersBtn} ${showMembers ? styles.membersBtnActive : ''}`}
+                        onClick={handleToggleMembers}
+                        aria-expanded={showMembers}
+                    >
+                        <Users aria-hidden="true" />
+                        Участники
                     </button>
                 )}
             </div>
 
-            {error && <div className={styles.error}>{error}</div>}
+            {error && (
+                <div className={styles.errorWrap}>
+                    <Alert>{error}</Alert>
+                </div>
+            )}
 
             {chatType === 'group' && showMembers && (
                 <div className={styles.membersPanel}>
-                    {membersLoading && <p className={styles.empty}>Загрузка...</p>}
+                    {membersLoading && <Spinner label="Загружаем участников" />}
 
                     {!membersLoading && (
                         <>
-                            <div className={styles.membersSection}>
-                                <div className={styles.membersSectionTitle}>Участники ({members.length})</div>
+                            <section className={styles.membersSection}>
+                                <h3 className={styles.membersSectionTitle}>
+                                    Участники ({members.length})
+                                </h3>
                                 {members.map(m => (
                                     <div key={m.id} className={styles.memberItem}>
                                         <Avatar avatarUrl={m.avatar_url} size={32} />
@@ -583,36 +609,42 @@ function ChatWindowPage() {
                                             {m.first_name} {m.last_name}
                                             {m.id === currentUser?.id && ' (вы)'}
                                         </span>
-                                        <button
-                                            className={styles.memberRemoveBtn}
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            icon={UserMinus}
                                             onClick={() => handleRemoveMember(m.id)}
                                             disabled={busyUserId === m.id}
                                         >
                                             {m.id === currentUser?.id ? 'Покинуть' : 'Удалить'}
-                                        </button>
+                                        </Button>
                                     </div>
                                 ))}
-                            </div>
+                            </section>
 
-                            <div className={styles.membersSection}>
-                                <div className={styles.membersSectionTitle}>Добавить друга</div>
+                            <section className={styles.membersSection}>
+                                <h3 className={styles.membersSectionTitle}>Добавить друга</h3>
                                 {availableFriends.length === 0 && (
                                     <p className={styles.empty}>Все друзья уже в группе</p>
                                 )}
                                 {availableFriends.map(f => (
                                     <div key={f.id} className={styles.memberItem}>
                                         <Avatar avatarUrl={f.avatar_url} size={32} />
-                                        <span className={styles.memberName}>{f.first_name} {f.last_name}</span>
-                                        <button
-                                            className={styles.memberAddBtn}
+                                        <span className={styles.memberName}>
+                                            {f.first_name} {f.last_name}
+                                        </span>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            icon={UserPlus}
                                             onClick={() => handleAddMember(f.id)}
                                             disabled={busyUserId === f.id}
                                         >
                                             Добавить
-                                        </button>
+                                        </Button>
                                     </div>
                                 ))}
-                            </div>
+                            </section>
                         </>
                     )}
                 </div>
@@ -666,7 +698,7 @@ function ChatWindowPage() {
                                 </div>
                             </div>
                         ),
-                        Footer: () => <div style={{ height: 12 }} />,
+                        Footer: () => <div className={styles.listFooter} />,
                     }}
                     itemContent={(index, message) => {
                         const isOwn = message.sender_id === currentUser?.id
@@ -693,95 +725,56 @@ function ChatWindowPage() {
                 />
             )}
 
-            <div className={styles.inputBar} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 4 }}>
+            <div className={styles.inputBar}>
                 {editingMessage && (
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '2px 10px',
-                            fontSize: 13,
-                            opacity: 0.8,
-                        }}
-                    >
-                        <span>✏️ Редактирование сообщения</span>
+                    <div className={styles.editingHint}>
+                        <Pencil aria-hidden="true" />
+                        <span>Редактирование сообщения</span>
                         <button
                             type="button"
                             onClick={handleCancelEdit}
                             title="Отменить редактирование"
                             aria-label="Отменить редактирование"
-                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 15, lineHeight: 1 }}
+                            className={styles.editingHintClose}
                         >
-                            ✕
+                            <X aria-hidden="true" />
                         </button>
                     </div>
                 )}
 
                 {pendingImage && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px' }}>
-                        <div style={{ position: 'relative', width: 56, height: 56, flexShrink: 0 }}>
+                    <div className={styles.pendingRow}>
+                        <div className={styles.pendingThumb}>
                             {pendingImage.previewUrl.startsWith('blob:') ? (
-                                <img
-                                    src={pendingImage.previewUrl}
-                                    alt=""
-                                    style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, display: 'block' }}
-                                />
+                                <img className={styles.pendingImage} src={pendingImage.previewUrl} alt="" />
                             ) : (
                                 <ChatImage
                                     imageUrl={pendingImage.previewUrl}
                                     width={56}
                                     height={56}
-                                    className={styles.image}
+                                    className={styles.pendingImage}
                                 />
                             )}
                             {pendingImage.uploading && (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: 'rgba(255,255,255,0.65)',
-                                        borderRadius: 8,
-                                        fontSize: 10,
-                                    }}
-                                >
-                                    ...
-                                </div>
+                                <div className={styles.pendingOverlay}>...</div>
                             )}
                             <button
                                 type="button"
                                 onClick={handleRemoveImage}
                                 title="Убрать изображение"
                                 aria-label="Убрать изображение"
-                                style={{
-                                    position: 'absolute',
-                                    top: -6,
-                                    right: -6,
-                                    width: 20,
-                                    height: 20,
-                                    borderRadius: '50%',
-                                    border: 'none',
-                                    background: 'rgba(0,0,0,0.65)',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    fontSize: 12,
-                                    lineHeight: '20px',
-                                    padding: 0,
-                                }}
+                                className={styles.pendingRemove}
                             >
-                                ✕
+                                <X aria-hidden="true" />
                             </button>
                         </div>
-                        <span style={{ fontSize: 12, opacity: 0.7 }}>
+                        <span className={styles.pendingLabel}>
                             {pendingImage.uploading ? 'Загрузка изображения...' : 'Изображение прикреплено'}
                         </span>
                     </div>
                 )}
 
-                <form onSubmit={handleSend} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <form onSubmit={handleSend} className={styles.composeForm}>
                     <button
                         type="button"
                         className={styles.attachBtn}
@@ -790,14 +783,14 @@ function ChatWindowPage() {
                         title={pendingImage ? 'Заменить изображение' : 'Прикрепить изображение'}
                         aria-label={pendingImage ? 'Заменить изображение' : 'Прикрепить изображение'}
                     >
-                        📎
+                        <Paperclip aria-hidden="true" />
                     </button>
                     <input
                         type="file"
                         accept="image/*"
                         ref={fileInputRef}
                         onChange={handleImageChange}
-                        style={{ display: 'none' }}
+                        className="visually-hidden"
                     />
                     <label className="visually-hidden" htmlFor="chat-message">Сообщение</label>
                     <input
@@ -812,12 +805,15 @@ function ChatWindowPage() {
                         placeholder={editingMessage ? 'Изменить сообщение...' : 'Сообщение...'}
                         className={styles.textInput}
                     />
-                    <button type="submit" className={styles.sendBtn} disabled={pendingImage?.uploading}>
-                        <>
-                            <span className={styles.sendBtnText}>{editingMessage ? 'Сохранить' : 'Отправить'}</span>
-                            <span className={styles.sendBtnIcon}>{editingMessage ? '\u2713' : '\u2708'}</span>
-                        </>
-                    </button>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        icon={editingMessage ? Check : Send}
+                        disabled={pendingImage?.uploading}
+                        className={styles.sendBtn}
+                    >
+                        {editingMessage ? 'Сохранить' : 'Отправить'}
+                    </Button>
                 </form>
             </div>
         </div>

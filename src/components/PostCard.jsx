@@ -1,12 +1,26 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import {
+    Flag,
+    Heart,
+    ImagePlus,
+    MessageCircle,
+    MoreHorizontal,
+    Pencil,
+    Send,
+    Trash2,
+    X,
+} from 'lucide-react'
 import { postService } from '../services/postService'
 import { validateImageFile } from '../utils/imageFile'
 import { useAuthContext } from '../context/AuthContext'
 import { usePostActions } from '../context/PostActionsContext'
-import styles from './PostCard.module.css'
+import GlassCard from './ui/GlassCard'
+import Button from './ui/Button'
+import Alert from './ui/Alert'
 import Avatar from './Avatar'
 import ImageZoomModal from './ImageZoomModal'
+import styles from './PostCard.module.css'
 
 function PostCard({ post, author }) {
     const { currentUser } = useAuthContext()
@@ -57,7 +71,6 @@ function PostCard({ post, author }) {
                 ? { filename: post.image_url, previewUrl: postService.resolveImageUrl(post.image_url), uploading: false }
                 : null
         )
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditing, post.content, post.image_url])
 
     useEffect(() => {
@@ -221,14 +234,19 @@ function PostCard({ post, author }) {
         })
     }
 
+    const fullName = `${author.first_name} ${author.last_name}`.trim()
+    const canSaveEdit = Boolean(editText.trim() || pendingImage) && !editSaving && !pendingImage?.uploading
+
     return (
-        <div className={styles.card}>
-            <div className={styles.header} >
+        <GlassCard as="article" className={styles.card}>
+            <header className={`${styles.header} ${menuOpen ? styles.headerOpen : ''}`}>
                 <Link className={styles.authorLink} to={`/users/${author.id}`}>
-                    <Avatar avatarUrl={author?.avatar_url} size={38} />
-                    <div>
-                        <div className={styles.author}>{`${author.first_name} ${author.last_name}`}</div>
-                        <div className={styles.time}>{getDate(new Date(post.created_at))}</div>
+                    <Avatar avatarUrl={author?.avatar_url} size={40} />
+                    <div className={styles.authorMeta}>
+                        <span className={styles.author}>{fullName}</span>
+                        <time className={styles.time} dateTime={post.created_at}>
+                            {getDate(new Date(post.created_at))}
+                        </time>
                     </div>
                 </Link>
 
@@ -241,30 +259,33 @@ function PostCard({ post, author }) {
                         aria-expanded={menuOpen}
                         aria-label="Действия с постом"
                     >
-                        •••
+                        <MoreHorizontal aria-hidden="true" />
                     </button>
 
                     {menuOpen && (
                         <div className={styles.menuDropdown} role="menu">
                             {isOwner && (
                                 <button type="button" className={styles.menuItem} onClick={handleEditClick} role="menuitem">
-                                    ✏️ Редактировать
+                                    <Pencil aria-hidden="true" />
+                                    Редактировать
                                 </button>
                             )}
                             {isOwner && (
                                 <button type="button" className={styles.menuItemDanger} onClick={handleDeleteClick} role="menuitem">
-                                    🗑️ Удалить
+                                    <Trash2 aria-hidden="true" />
+                                    Удалить
                                 </button>
                             )}
                             {!isOwner && (
                                 <button type="button" className={styles.menuItem} onClick={handleReportClick} role="menuitem">
-                                    🚩 Пожаловаться
+                                    <Flag aria-hidden="true" />
+                                    Пожаловаться
                                 </button>
                             )}
                         </div>
                     )}
                 </div>
-            </div>
+            </header>
 
             {isEditing ? (
                 <form className={styles.editForm} onSubmit={handleEditSubmit}>
@@ -273,6 +294,7 @@ function PostCard({ post, author }) {
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         rows={3}
+                        aria-label="Текст поста"
                         autoFocus
                         onKeyDown={(e) => {
                             if (e.key === 'Escape') handleEditCancel()
@@ -296,77 +318,103 @@ function PostCard({ post, author }) {
                                 aria-label="Убрать изображение"
                                 className={styles.editImageRemoveBtn}
                             >
-                                ✕
+                                <X aria-hidden="true" />
                             </button>
                         </div>
                     )}
 
                     <div className={styles.editActionsRow}>
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
+                            size="sm"
+                            icon={ImagePlus}
                             onClick={() => editFileInputRef.current?.click()}
                             disabled={editSaving}
-                            className={styles.editAttachBtn}
                         >
-                            📎 {pendingImage ? 'Заменить фото' : 'Добавить фото'}
-                        </button>
+                            {pendingImage ? 'Заменить фото' : 'Добавить фото'}
+                        </Button>
                         <input
                             type="file"
                             accept="image/*"
                             ref={editFileInputRef}
                             onChange={handleEditImageChange}
-                            style={{ display: 'none' }}
+                            className="visually-hidden"
                         />
+
                         <div className={styles.editActions}>
-                            <button style={{backgroundColor: "#d64545"}} type="button" onClick={handleEditCancel} disabled={editSaving}>
+                            <Button type="button" variant="ghost" size="sm" onClick={handleEditCancel} disabled={editSaving}>
                                 Отмена
-                            </button>
-                            <button
-                                style={{backgroundColor: "#3f6b4a"}}
-                                type="submit"
-                                disabled={editSaving || pendingImage?.uploading || (!editText.trim() && !pendingImage)}
-                            >
+                            </Button>
+                            <Button type="submit" variant="primary" size="sm" disabled={!canSaveEdit}>
                                 {editSaving ? 'Сохранение...' : 'Сохранить'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </form>
             ) : (
                 post.content && <div className={styles.content}>{post.content}</div>
             )}
-            {!isEditing && (
-                <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                    {post.image_url && (
-                        <button type="button" className={styles.imageButton} onClick={() => setIsZoomOpen(true)} aria-label="Открыть изображение поста">
-                            <img src={postService.resolveImageUrl(post.image_url)} alt="Изображение поста" className={styles.image} loading="lazy" />
-                        </button>
-                    )}
+
+            {!isEditing && post.image_url && (
+                <div className={styles.imageWrap}>
+                    <button
+                        type="button"
+                        className={styles.imageButton}
+                        onClick={() => setIsZoomOpen(true)}
+                        aria-label="Открыть изображение поста"
+                    >
+                        <img
+                            src={postService.resolveImageUrl(post.image_url)}
+                            alt="Изображение поста"
+                            className={styles.image}
+                            loading="lazy"
+                        />
+                    </button>
                 </div>
             )}
 
             <div className={styles.actions}>
                 <button
-                    className={liked ? styles.likeBtnActive : styles.likeBtn}
+                    type="button"
+                    className={`${styles.actionBtn} ${liked ? styles.liked : ''}`}
                     onClick={handleToggleLike}
                     disabled={likeBusy}
+                    aria-pressed={liked}
+                    aria-label={liked ? 'Убрать отметку "Нравится"' : 'Нравится'}
                 >
-                    {liked ? '❤️' : '🤍'} {likesCount}
+                    <Heart className={styles.actionIcon} aria-hidden="true" />
+                    <span>{likesCount}</span>
                 </button>
-                <button className={styles.commentBtn} onClick={() => setShowComments(v => !v)}>
-                    💬 {comments.length > 0 ? comments.length : 'Комментировать'}
+
+                <button
+                    type="button"
+                    className={styles.actionBtn}
+                    onClick={() => setShowComments(v => !v)}
+                    aria-expanded={showComments}
+                >
+                    <MessageCircle className={styles.actionIcon} aria-hidden="true" />
+                    <span>{comments.length > 0 ? comments.length : 'Комментировать'}</span>
                 </button>
             </div>
-            {actionError && <p className={styles.actionError} role="alert">{actionError}</p>}
+
+            {actionError && <Alert>{actionError}</Alert>}
 
             {showComments && (
                 <div className={styles.commentsSection}>
+                    {comments.length === 0 && (
+                        <p className={styles.noComments}>Комментариев пока нет — напишите первым</p>
+                    )}
+
                     {comments.map((c, i) => (
                         <div key={i} className={styles.commentItem}>
                             <Link to={`/users/${c.author.id}`} aria-label={`Профиль: ${c.author.first_name} ${c.author.last_name}`}>
-                                <Avatar avatarUrl={c.author.avatar_url} size={38}/>
+                                <Avatar avatarUrl={c.author.avatar_url} size={34} />
                             </Link>
                             <div className={styles.commentBody}>
-                                <span className={styles.commentAuthor}>{c.author.first_name} {c.author.last_name}</span>
+                                <span className={styles.commentAuthor}>
+                                    {c.author.first_name} {c.author.last_name}
+                                </span>
                                 <span className={styles.commentText}>{c.content}</span>
                             </div>
                         </div>
@@ -381,24 +429,26 @@ function PostCard({ post, author }) {
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
                         />
-                        <button type="submit" disabled={sending} className={styles.sendBtn}>
-                            {sending ? '...' : (
-                                <>
-                                    <span className={styles.sendBtnText}>Отправить</span>
-                                    <span className={styles.sendBtnIcon}>&#x2708;</span>
-                                </>
-                            )}
-                        </button>
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="sm"
+                            icon={Send}
+                            disabled={sending || !commentText.trim()}
+                        >
+                            {sending ? '...' : 'Отправить'}
+                        </Button>
                     </form>
                 </div>
             )}
+
             {isZoomOpen && post.image_url && (
                 <ImageZoomModal
                     src={postService.resolveImageUrl(post.image_url)}
                     onClose={() => setIsZoomOpen(false)}
                 />
             )}
-        </div>
+        </GlassCard>
     )
 }
 

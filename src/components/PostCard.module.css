@@ -1,42 +1,62 @@
 .card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    box-shadow: var(--shadow-card);
-    margin-bottom: 16px;
+    padding: var(--space-4) var(--space-5) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
+
+/* ---- Header ---- */
 
 .header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: var(--space-3);
 }
 
-.authorLink { display: flex; gap: 12px; color: inherit; text-decoration: none; }
-.authorLink:hover .author { text-decoration: underline; }
-.imageButton { display: block; padding: 0; border: 0; background: none; cursor: zoom-in; }
-.actionError { color: var(--color-danger); font-size: 13px; margin: 8px 0; }
+/* .card > * in GlassCard.module.css puts every direct child at z-index: 1,
+   which traps the dropdown inside the header's stacking context — later
+   siblings (content, actions) then paint and hit-test over the menu. */
+.card > .headerOpen {
+    z-index: 2;
+}
 
-.header img {
-    display: block;
+.authorLink {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+}
+
+.authorMeta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .author {
-    font-family: var(--font-body);
     font-weight: 700;
-    font-size: 15px;
-    color: var(--color-ink);
+    font-size: var(--text-base);
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.authorLink:hover .author {
+    color: var(--green);
 }
 
 .time {
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--color-ink-faint);
-    letter-spacing: 0.01em;
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
 }
+
+/* ---- Overflow menu ---- */
 
 .menuWrapper {
     position: relative;
@@ -44,75 +64,122 @@
 }
 
 .menuTrigger {
-    background: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
     border: none;
-    cursor: pointer;
-    color: var(--color-ink-soft);
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 1;
-    letter-spacing: 1px;
-    padding: 6px 10px;
-    border-radius: var(--radius-full);
-    transition: background 0.15s ease, color 0.15s ease;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-faint);
+    transition:
+        background var(--dur-fast) var(--ease),
+        color var(--dur-fast) var(--ease);
+}
+
+.menuTrigger svg {
+    width: 18px;
+    height: 18px;
 }
 
 .menuTrigger:hover {
-    background: var(--color-line-soft);
-    color: var(--color-ink);
+    background: var(--green-tint);
+    color: var(--green);
 }
 
 .menuDropdown {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 6px);
     right: 0;
-    min-width: 180px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-    padding: 6px;
+    z-index: var(--z-dropdown);
+    min-width: 190px;
+    padding: 5px;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    z-index: 10;
+    border-radius: var(--radius-md);
+    background: var(--glass-tint-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    border: 1px solid var(--glass-ring);
+    box-shadow: var(--glass-shadow-pop);
+    transform-origin: top right;
+    animation: dropdown-in var(--dur-base) var(--ease-out);
+}
+
+@keyframes dropdown-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 .menuItem,
 .menuItemDanger {
-    background: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 9px 12px;
     border: none;
-    cursor: pointer;
+    border-radius: var(--radius-sm);
+    background: transparent;
     text-align: left;
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-weight: 600;
     font-family: var(--font-body);
-    color: var(--color-ink);
-    padding: 9px 12px;
-    border-radius: var(--radius-sm);
-    transition: background 0.15s ease;
+    color: var(--ink);
+    transition: background var(--dur-fast) var(--ease);
+}
+
+.menuItem svg,
+.menuItemDanger svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
 }
 
 .menuItem:hover {
-    background: var(--color-line-soft);
+    background: var(--green-tint);
+    color: var(--green);
 }
 
 .menuItemDanger {
-    color: #d64545;
+    color: var(--danger);
 }
 
 .menuItemDanger:hover {
-    background: rgba(214, 69, 69, 0.1);
+    background: var(--danger-tint);
 }
+
+/* ---- Content ---- */
 
 .content {
     white-space: pre-wrap;
-    word-break: break-word;
-    color: var(--color-ink);
-    font-size: 15px;
-    margin-bottom: 14px;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font-size: var(--text-base);
     line-height: 1.6;
+}
+
+.imageWrap {
+    display: flex;
+    justify-content: center;
+}
+
+.imageButton {
+    display: block;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .image {
@@ -120,214 +187,179 @@
     max-height: 520px;
     object-fit: cover;
     border-radius: var(--radius-md);
-    margin-bottom: 14px;
-    border: 1px solid var(--color-line);
+    border: 1px solid var(--glass-ring);
+    transition: transform var(--dur-base) var(--ease);
 }
+
+.imageButton:hover .image {
+    transform: scale(1.015);
+}
+
+/* ---- Actions ---- */
 
 .actions {
     display: flex;
-    gap: 6px;
-    border-top: 1px solid var(--color-line-soft);
-    padding-top: 10px;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-soft);
 }
 
-.likeBtn,
-.likeBtnActive,
-.commentBtn {
-    background: none;
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px 12px;
     border: none;
-    cursor: pointer;
-    font-size: 14px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
     font-weight: 600;
     font-family: var(--font-body);
-    color: var(--color-ink-soft);
-    padding: 7px 12px;
-    border-radius: var(--radius-full);
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+        background var(--dur-fast) var(--ease),
+        color var(--dur-fast) var(--ease),
+        transform var(--dur-fast) var(--ease);
 }
 
-.likeBtn:hover,
-.commentBtn:hover {
-    background: var(--color-line-soft);
-    color: var(--color-ink);
+.actionBtn:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
-.likeBtnActive {
-    color: var(--color-plum);
-    background: var(--color-plum-tint);
+.actionBtn:disabled {
+    opacity: 0.55;
 }
 
-.likeBtnActive:hover {
-    background: var(--color-plum-tint);
+.actionIcon {
+    width: 18px;
+    height: 18px;
 }
+
+.actionBtn:hover:not(:disabled) {
+    background: var(--green-tint);
+    color: var(--green);
+}
+
+/* Liked state: filled heart in the brand plum-free palette. */
+.liked {
+    color: var(--green);
+}
+
+.liked .actionIcon {
+    fill: currentColor;
+}
+
+.liked:hover:not(:disabled) {
+    background: var(--green-tint-strong);
+    color: var(--green-deep);
+}
+
+/* ---- Comments ---- */
 
 .commentsSection {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--color-line-soft);
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-soft);
+}
+
+.noComments {
+    font-size: var(--text-sm);
+    color: var(--ink-faint);
+    padding: var(--space-2) 0;
 }
 
 .commentItem {
     display: flex;
-    gap: 10px;
-    position: relative;
-}
-
-.commentItem::before {
-    content: "";
-    position: absolute;
-    left: 19px;
-    top: 38px;
-    bottom: -14px;
-    width: 1px;
-    background: var(--color-line);
-}
-
-.commentItem:last-child::before {
-    display: none;
+    gap: var(--space-3);
+    align-items: flex-start;
 }
 
 .commentBody {
-    background: var(--color-surface-alt);
-    border: 1px solid var(--color-line-soft);
-    border-radius: var(--radius-md);
-    border-top-left-radius: 4px;
-    padding: 8px 14px;
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
+    padding: 9px 14px;
+    border-radius: var(--radius-md);
+    /* Asymmetric corner points back at the author's avatar. */
+    border-top-left-radius: var(--radius-xs);
+    background: var(--surface-alt);
+    border: 1px solid var(--line-soft);
 }
 
 .commentAuthor {
     font-weight: 700;
-    font-size: 12.5px;
-    color: var(--color-ink);
+    font-size: var(--text-sm);
+    color: var(--ink);
 }
 
 .commentText {
-    font-size: 14px;
-    color: var(--color-ink);
-    word-break: break-word;
-    line-height: 1.45;
-}
-
-.commentImage {
-    max-width: 160px;
-    border-radius: var(--radius-sm);
-    margin-top: 4px;
-    border: 1px solid var(--color-line);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+    line-height: 1.5;
 }
 
 .commentForm {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
-    margin-left: 46px;
 }
 
 .commentForm input {
     flex: 1;
-    padding: 9px 14px;
-    border: 1px solid var(--color-line);
+    min-width: 0;
+    padding: 9px 15px;
+    border: 1px solid var(--line);
     border-radius: var(--radius-full);
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-family: var(--font-body);
-    background: var(--color-surface-alt);
-    outline: none;
-    transition: border-color 0.15s ease;
+    background: var(--surface-alt);
+    color: var(--ink);
+    transition:
+        border-color var(--dur-fast) var(--ease),
+        background var(--dur-fast) var(--ease);
+}
+
+.commentForm input::placeholder {
+    color: var(--ink-faint);
 }
 
 .commentForm input:focus {
-    border-color: var(--color-moss);
+    outline: none;
+    border-color: var(--green);
+    background: var(--surface);
 }
 
-.commentForm button {
-    padding: 9px 18px;
-    background: var(--color-moss);
-    color: white;
-    border: none;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: var(--font-body);
-    transition: background 0.15s ease;
-}
-
-.commentForm button:hover:not(:disabled) {
-    background: var(--color-moss-deep);
-}
-
-.commentForm button:disabled {
-    background: var(--color-ink-faint);
-    cursor: not-allowed;
-}
+/* ---- Editing ---- */
 
 .editForm {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: var(--space-3);
 }
 
 .editTextarea {
+    width: 100%;
     resize: vertical;
-    font: inherit;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
-
-.editActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-.editActionsRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.editActions button {
-    padding: 9px 18px;
-    color: white;
-    border: none;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
     font-family: var(--font-body);
-    transition: background 0.15s ease;
+    font-size: var(--text-base);
+    line-height: 1.55;
+    color: var(--ink);
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-alt);
 }
 
-.editAttachBtn {
-    background: transparent;
-    color: var(--color-ink-soft);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-full);
-    padding: 8px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--font-body);
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.editAttachBtn:hover:not(:disabled) {
-    background: var(--color-line-soft);
-    color: var(--color-ink);
-}
-
-.editAttachBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.editTextarea:focus {
+    outline: none;
+    border-color: var(--green);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--green-tint);
 }
 
 .editImagePreviewWrap {
@@ -337,52 +369,71 @@
 }
 
 .editImagePreview {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-line);
+    border: 1px solid var(--glass-ring);
     display: block;
 }
 
 .editImageOverlay {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.65);
+    display: grid;
+    place-items: center;
     border-radius: var(--radius-md);
-    font-size: 11px;
-    font-family: var(--font-body);
-    color: var(--color-ink-soft);
+    background: var(--glass-tint-strong);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-size: var(--text-xs);
+    color: var(--ink-soft);
 }
 
 .editImageRemoveBtn {
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.65);
-    color: #fff;
-    cursor: pointer;
-    font-size: 13px;
-    line-height: 22px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
     padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--surface);
+    transition: transform var(--dur-fast) var(--ease);
 }
 
-.sendBtnIcon {
-    display: none;
+.editImageRemoveBtn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.editImageRemoveBtn:hover {
+    transform: scale(1.1);
+}
+
+.editActionsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.editActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
 }
 
 @media (max-width: 480px) {
-    .sendBtnText {
-        display: none;
+    .card {
+        padding: var(--space-4);
     }
-    .sendBtnIcon {
-        display: inline;
+
+    .commentForm {
+        flex-wrap: wrap;
     }
 }

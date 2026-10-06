@@ -1,4 +1,5 @@
 import api from './api'
+import { clearBanInfo } from './banState'
 
 export const authService = {
     async register(userData) {
@@ -14,6 +15,8 @@ export const authService = {
         if (data.refresh_token) {
             localStorage.setItem('refreshToken', data.refresh_token)
         }
+        // A stale notice would keep ProtectedRoute bouncing to /banned.
+        clearBanInfo()
         return data
     },
 

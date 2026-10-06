@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
 import { notificationService } from '../services/notificationService'
+import { BAN_PATH, saveBanInfo } from '../services/banState'
 import { useAuthContext } from './AuthContext'
 import ToastContainer from '../components/ToastContainer'
 
@@ -68,6 +69,16 @@ export function NotificationProvider({ children }) {
 
         const conn = notificationService.connectToSever({
             onEvent: (notification) => {
+                // Ban pushed by the admin panel: drop tokens and show
+                // the notice, the API would 403 on the next request anyway.
+                if (notification.type === 'banned') {
+                    localStorage.removeItem('accessToken')
+                    localStorage.removeItem('refreshToken')
+                    saveBanInfo(notification.reason)
+                    window.location.href = BAN_PATH
+                    return
+                }
+
                 // Обновление одного юзера: он стал онлайн/офлайн
                 if (notification.type === 'presence') {
                     setOnlineUsers(prev => {

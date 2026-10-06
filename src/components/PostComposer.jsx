@@ -1,9 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
+import { ImagePlus, Send, X } from 'lucide-react'
 import { postService } from '../services/postService'
+import { useAuthContext } from '../context/AuthContext'
 import { validateImageFile } from '../utils/imageFile'
+import GlassCard from './ui/GlassCard'
+import Button from './ui/Button'
+import Alert from './ui/Alert'
+import Avatar from './Avatar'
 import styles from './PostComposer.module.css'
 
 function PostComposer({ onPostCreated }) {
+    const { currentUser } = useAuthContext()
     const [text, setText] = useState('')
     const [imageFile, setImageFile] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
@@ -37,9 +44,11 @@ function PostComposer({ onPostCreated }) {
         if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
+    const canSubmit = Boolean(text.trim() || imageFile) && !posting
+
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!text.trim() && !imageFile) return
+        if (!canSubmit) return
 
         setPosting(true)
         setError('')
@@ -64,41 +73,65 @@ function PostComposer({ onPostCreated }) {
     }
 
     return (
-        <form className={styles.postForm} onSubmit={handleSubmit}>
-            <label className="visually-hidden" htmlFor="post-content">Текст поста</label>
-            <textarea
-                id="post-content"
-                placeholder="Что нового?"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={3}
-            />
+        <GlassCard as="form" className={styles.composer} onSubmit={handleSubmit}>
+            <div className={styles.head}>
+                <Avatar avatarUrl={currentUser?.avatar_url} size={40} />
+                <label className="visually-hidden" htmlFor="post-content">Текст поста</label>
+                <textarea
+                    id="post-content"
+                    className={styles.textarea}
+                    placeholder="Что нового?"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    rows={2}
+                />
+            </div>
 
             {imagePreview && (
                 <div className={styles.previewWrap}>
-                    <img src={imagePreview} alt="preview" className={styles.preview} />
-                    <button type="button" className={styles.removePreview} onClick={handleRemoveImage} aria-label="Убрать изображение">✕</button>
+                    <img src={imagePreview} alt="Предпросмотр" className={styles.preview} />
+                    <button
+                        type="button"
+                        className={styles.previewRemove}
+                        onClick={handleRemoveImage}
+                        aria-label="Убрать изображение"
+                    >
+                        <X />
+                    </button>
                 </div>
             )}
 
-            {error && <p className={styles.error} role="alert">{error}</p>}
+            {error && <Alert>{error}</Alert>}
 
-            <div className={styles.formActions}>
-                <button type="button" className={styles.attachBtn} onClick={() => fileInputRef.current?.click()}>
-                    📎 Фото
-                </button>
+            <div className={styles.actions}>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    icon={ImagePlus}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    Фото
+                </Button>
                 <input
                     type="file"
                     accept="image/*"
                     ref={fileInputRef}
                     onChange={handleImageChange}
-                    style={{ display: 'none' }}
+                    className="visually-hidden"
                 />
-                <button type="submit" className={styles.postBtn} disabled={posting || (!text.trim() && !imageFile)}>
-                    {posting ? 'Публикация...' : 'Опубликовать'}
-                </button>
+
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    icon={Send}
+                    disabled={!canSubmit}
+                >
+                    {posting ? 'Публикуем...' : 'Опубликовать'}
+                </Button>
             </div>
-        </form>
+        </GlassCard>
     )
 }
 

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { BAN_PATH, isBanDetail, saveBanInfo } from './banState'
 
 export const API_URL = import.meta.env.VITE_API_URL
 
@@ -32,6 +33,16 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config
+
+        // A ban is terminal for this session: drop the tokens and show
+        // the notice instead of chasing a refresh that will also 403.
+        if (isBanDetail(error.response?.data?.detail)) {
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            saveBanInfo(error.response.data.detail.reason)
+            window.location.href = BAN_PATH
+            return Promise.reject(error)
+        }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (originalRequest.url === '/auth/refresh') {

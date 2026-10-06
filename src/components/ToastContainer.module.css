@@ -1,34 +1,48 @@
 .container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: var(--space-5);
+    right: var(--space-5);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 9999;
+    gap: var(--space-2);
+    z-index: var(--z-toast);
     pointer-events: none;
+    max-width: calc(100vw - var(--space-8));
 }
 
 .toast {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    min-width: 260px;
-    max-width: 340px;
-    padding: 12px 14px;
-    background: #1e1e1e;
-    color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    gap: var(--space-3);
+    width: min(320px, calc(100vw - var(--space-8)));
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    /* Toasts sit on top of the page, so they need the strongest
+       glass in the system to stay readable over anything. */
+    background: var(--glass-tint-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    border: 1px solid var(--glass-ring);
+    box-shadow: var(--glass-shadow-pop);
     cursor: pointer;
     pointer-events: auto;
-    animation: slide-in 0.25s ease-out;
+    animation: slide-in var(--dur-slow) var(--ease-out);
 }
 
 .icon {
-    font-size: 18px;
-    line-height: 1;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: var(--green-tint);
+    color: var(--green);
+}
+
+.icon svg {
+    width: 16px;
+    height: 16px;
 }
 
 .body {
@@ -36,8 +50,9 @@
 }
 
 .title {
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: var(--ink);
     margin-bottom: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -45,22 +60,42 @@
 }
 
 .text {
-    font-size: 13px;
-    color: #ccc;
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
     overflow: hidden;
-    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
 @keyframes slide-in {
     from {
         opacity: 0;
-        transform: translateX(30px);
+        transform: translateX(24px) scale(0.96);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .container {
+        left: var(--space-3);
+        right: var(--space-3);
+        bottom: var(--space-3);
+        max-width: none;
+    }
+
+    .toast {
+        width: 100%;
+    }
+}
+
+/* Sit above the bottom tab bar rather than on top of it. */
+@media (max-width: 700px) {
+    .container {
+        bottom: calc(var(--nav-bar-height) + var(--space-3) + env(safe-area-inset-bottom));
     }
 }

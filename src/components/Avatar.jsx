@@ -1,4 +1,5 @@
 import defaultAvatar from '../assets/default-avatar.png'
+import styles from './Avatar.module.css'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -6,34 +7,17 @@ export function resolveAvatarUrl(avatarUrl) {
     return avatarUrl ? `${API_URL}${avatarUrl}` : defaultAvatar
 }
 
-export default function Avatar({ avatarUrl, size = 100, isOnline = false }) {
+export default function Avatar({ avatarUrl, size = 100, isOnline = false, className = '' }) {
     const src = resolveAvatarUrl(avatarUrl)
+    const dot = Math.max(8, Math.round(size * 0.26))
 
     return (
-        <div style={{ position: "relative", width: size, height: size, display: "inline-block" }}>
-            <img
-                src={src}
-                alt="avatar"
-                width={size}
-                height={size}
-                style={{ borderRadius: "50%", objectFit: "cover" }}
-            />
-            {isOnline && (
-                <span
-                    style={{
-                        position: "absolute",
-                        zIndex: 10,
-                        bottom: 0,
-                        right: 0,
-                        width: size * 0.28,
-                        height: size * 0.28,
-                        borderRadius: "50%",
-                        backgroundColor: "#22c55e",
-                        border: "2px solid white",
-                        boxSizing: "border-box"
-                    }}
-                />
-            )}
-        </div>
+        <span
+            className={`${styles.avatar} ${className}`}
+            style={{ '--size': `${size}px`, '--dot': `${dot}px` }}
+        >
+            <img className={styles.image} src={src} alt="" width={size} height={size} />
+            {isOnline && <span className={styles.online} aria-label="В сети" />}
+        </span>
     )
 }

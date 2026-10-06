@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import { useNotifications, NotificationProvider } from './context/NotificationContext'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
+import AdminRoute from './components/ProtectedRoute/AdminRoute'
 import Layout from './components/Layout'
 
 import LoginPage from './pages/LoginPage/LoginPage'
@@ -13,6 +15,8 @@ import ChatsPage from './pages/ChatsPage/ChatsPage'
 import ChatWindowPage from './pages/ChatWindowPage/ChatWindowPage'
 import ProfilePage from './pages/ProfilePage/ProfilePage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
+import AdminPage from './pages/AdminPage/AdminPage'
+import BannedPage from './pages/BannedPage/BannedPage'
 
 function AppContent() {
     const { subscribe } = useNotifications()
@@ -29,6 +33,7 @@ function AppContent() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/banned" element={<BannedPage />} />
 
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                     <Route path="/feed" element={<FeedPage />} />
@@ -38,6 +43,10 @@ function AppContent() {
                     <Route path="/chats/:chatId" element={<ChatWindowPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/users/:userId" element={<UserProfilePage />} />
+                    <Route
+                        path="/admin"
+                        element={<AdminRoute><AdminPage /></AdminRoute>}
+                    />
                 </Route>
 
                 <Route path="/" element={<Navigate to="/feed" replace />} />
@@ -49,11 +58,13 @@ function AppContent() {
 
 function App() {
     return (
-        <AuthProvider>
-            <NotificationProvider>
-                <AppContent/>
-            </NotificationProvider>
-        </AuthProvider>
+        <ThemeProvider>
+            <AuthProvider>
+                <NotificationProvider>
+                    <AppContent/>
+                </NotificationProvider>
+            </AuthProvider>
+        </ThemeProvider>
     )
 }
 

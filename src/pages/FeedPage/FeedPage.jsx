@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { Rss } from 'lucide-react'
 import { postService } from '../../services/postService'
 import PostCard from '../../components/PostCard'
 import PostComposer from '../../components/PostComposer'
 import PostModeration from '../../components/PostModeration'
+import PageHeader from '../../components/ui/PageHeader'
+import Spinner from '../../components/ui/Spinner'
+import EmptyState from '../../components/ui/EmptyState'
+import Alert from '../../components/ui/Alert'
+import Button from '../../components/ui/Button'
 import styles from './FeedPage.module.css'
 
 const PAGE_SIZE = 15
@@ -77,33 +83,52 @@ function FeedPage() {
         return () => observer.disconnect()
     }, [loadMore, loading])
 
-    if (loading) {
-        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
-    }
-
     return (
         <div className={styles.container}>
-            <h1>Лента</h1>
+            <PageHeader title="Лента" subtitle="Свежие публикации ваших друзей" />
+
             <PostComposer onPostCreated={loadFeed} />
-            {error && <div className={styles.error} role="alert">{error} <button type="button" onClick={loadFeed}>Повторить</button></div>}
 
-            <div className={styles.feed}>
-                {posts.length === 0 && !error && <p className={styles.empty}>Пока нет постов от друзей</p>}
-                <PostModeration posts={posts} setPosts={setPosts}>
-                    {posts.map(post => (
-                        <PostCard key={post.id} post={post} author={post.author} />
-                    ))}
-                </PostModeration>
-            </div>
+            {error && (
+                <Alert action={<Button size="sm" variant="secondary" onClick={loadFeed}>Повторить</Button>}>
+                    {error}
+                </Alert>
+            )}
 
-            {pagingError && <div className={styles.error} role="alert">Не удалось загрузить следующие посты. <button type="button" onClick={() => loadMore(true)}>Повторить</button></div>}
-            {hasMore && !pagingError && (
-                <div ref={sentinelRef} className={styles.sentinel}>
-                    {loadingMore && <span>Загрузка...</span>}
+            {loading ? (
+                <Spinner label="Загружаем ленту" />
+            ) : (
+                <div className={styles.feed}>
+                    {posts.length === 0 && !error && (
+                        <EmptyState
+                            icon={Rss}
+                            title="Пока пусто"
+                            description="Здесь появятся публикации ваших друзей. Добавьте друзей, чтобы лента ожила."
+                        />
+                    )}
+
+                    <PostModeration posts={posts} setPosts={setPosts}>
+                        {posts.map(post => (
+                            <PostCard key={post.id} post={post} author={post.author} />
+                        ))}
+                    </PostModeration>
                 </div>
             )}
-            {!hasMore && posts.length > 0 && (
-                <p className={styles.empty}>На этом всё!</p>
+
+            {pagingError && (
+                <Alert action={<Button size="sm" variant="secondary" onClick={() => loadMore(true)}>Повторить</Button>}>
+                    Не удалось загрузить следующие посты
+                </Alert>
+            )}
+
+            {hasMore && !pagingError && !loading && (
+                <div ref={sentinelRef} className={styles.sentinel}>
+                    {loadingMore && <Spinner label="Подгружаем" className={styles.sentinelSpinner} />}
+                </div>
+            )}
+
+            {!hasMore && posts.length > 0 && !loading && (
+                <p className={styles.endOfFeed}>На этом всё — вы посмотрели всю ленту</p>
             )}
         </div>
     )

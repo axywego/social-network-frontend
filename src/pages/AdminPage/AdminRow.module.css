@@ -1,0 +1,115 @@
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: var(--glass-tint-quiet);
+    backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+    transition:
+        border-color var(--dur-fast) var(--ease),
+        background var(--dur-fast) var(--ease),
+        transform var(--dur-base) var(--ease);
+}
+
+.row:hover {
+    border-color: var(--green-tint-strong);
+    background: var(--glass-tint);
+    transform: translateY(-1px);
+}
+
+/* ---- Person (user lists) ---- */
+
+.person {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.name {
+    font-weight: 700;
+    font-size: var(--text-base);
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.person:hover .name,
+.reported:hover {
+    color: var(--green);
+}
+
+.username {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+}
+
+/* ---- Complaint ---- */
+
+.titles {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.arrow {
+    color: var(--ink-faint);
+    font-size: var(--text-sm);
+}
+
+.reported {
+    font-weight: 700;
+    font-size: var(--text-base);
+    color: var(--danger);
+    text-decoration: none;
+}
+
+.reason {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+}
+
+.meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+}
+
+/* ---- Actions ---- */
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+    .row {
+        flex-wrap: wrap;
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

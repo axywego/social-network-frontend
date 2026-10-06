@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Check, Flag, MessageCircle, UserMinus, UserPlus, X, FileText } from 'lucide-react'
 import { userService } from '../../services/userService'
 import { postService } from '../../services/postService'
 import { friendService } from '../../services/friendService'
 import { chatService } from '../../services/chatService'
 import { useAuthContext } from '../../context/AuthContext'
-import { PostActionsProvider } from '../../context/PostActionsContext'
+import { useNotifications } from '../../context/NotificationContext'
 import PostCard from '../../components/PostCard'
-import styles from './UserProfilePage.module.css'
-import Avatar, {resolveAvatarUrl} from '../../components/Avatar'
 import PostModeration from '../../components/PostModeration'
 import ImageZoomModal from '../../components/ImageZoomModal'
-import { useNotifications } from '../../context/NotificationContext'
+import ReportModal from '../../components/ReportModal'
+import { resolveAvatarUrl } from '../../components/Avatar'
+import ProfileHeader from '../../components/ui/ProfileHeader'
+import Button from '../../components/ui/Button'
+import Alert from '../../components/ui/Alert'
+import Spinner from '../../components/ui/Spinner'
+import EmptyState from '../../components/ui/EmptyState'
+import styles from './UserProfilePage.module.css'
 
 function UserProfilePage() {
     const { userId } = useParams()
     const navigate = useNavigate()
     const { currentUser } = useAuthContext()
+    const { isUserOnline } = useNotifications()
 
     const [profile, setProfile] = useState(null)
-    const { isUserOnline } = useNotifications()
     const [posts, setPosts] = useState([])
     const [friendCount, setFriendCount] = useState(0)
     const [relation, setRelation] = useState('none')
@@ -27,6 +33,8 @@ function UserProfilePage() {
     const [error, setError] = useState(null)
 
     const [isZoomOpen, setIsZoomOpen] = useState(false)
+    const [isReportOpen, setIsReportOpen] = useState(false)
+    const [reportNotice, setReportNotice] = useState('')
 
     useEffect(() => {
         if (currentUser && userId === currentUser.id) {
@@ -39,6 +47,7 @@ function UserProfilePage() {
     const loadData = async () => {
         try {
             setLoading(true)
+            setError(null)
             const [profileData, postsData, friends, incoming, outgoing, friendCountData] = await Promise.all([
                 userService.getUserById(userId),
                 postService.getUserPosts(userId),
@@ -127,76 +136,128 @@ function UserProfilePage() {
     }
 
     if (loading) {
-        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
+        return (
+            <div className={styles.container}>
+                <Spinner label="Загружаем профиль" />
+            </div>
+        )
     }
 
     if (error || !profile) {
-        return <div className={styles.container}><div className={styles.error}>{error || 'Пользователь не найден'}</div></div>
+        return (
+            <div className={styles.container}>
+                <Alert>{error || 'Пользователь не найден'}</Alert>
+            </div>
+        )
+    }
+
+    const relationActions = {
+        none: (
+            <Button variant="primary" icon={UserPlus} onClick={handleSendRequest}>
+                Добавить в друзья
+            </Button>
+        ),
+        outgoing: (
+            <Button variant="ghost" icon={X} onClick={handleDecline}>
+                Отменить заявку
+            </Button>
+        ),
+        incoming: (
+            <>
+                <Button variant="primary" icon={Check} onClick={handleAccept}>
+                    Принять заявку
+                </Button>
+                <Button variant="ghost" icon={X} onClick={handleDecline}>
+                    Отклонить
+                </Button>
+            </>
+        ),
+        friends: (
+            <Button variant="danger" icon={UserMinus} onClick={handleRemoveFriend}>
+                Удалить из друзей
+            </Button>
+        ),
     }
 
     return (
         <div className={styles.container}>
-            <div className={styles.profileHeader}>
-                <div className={styles.avatarLarge} style={{cursor:'pointer', overflow: 'visible'}} onClick={() => setIsZoomOpen(true)}>
-                    <Avatar avatarUrl={profile.avatar_url} isOnline={isUserOnline(profile.id)} size={100} />
-                </div>
-                {isZoomOpen && profile.avatar_url && (
-                    <ImageZoomModal
-                        src={resolveAvatarUrl(profile.avatar_url)}
-                        onClose={() => setIsZoomOpen(false)}
+            <ProfileHeader
+                profile={profile}
+                isOnline={isUserOnline(profile.id)}
+                avatarOverlay={
+                    <button
+                        type="button"
+                        className={styles.avatarAction}
+                        onClick={() => setIsZoomOpen(true)}
+                        aria-label="Открыть фото"
+                    >
+                        <span aria-hidden="true" />
+                    </button>
+                }
+                stats={[
+                    {
+                        label: 'Друзья',
+                        value: friendCount,
+                        onClick: () => navigate(`/users/${profile.id}/friends`),
+                    },
+                    { label: 'Постов', value: posts.length },
+                ]}
+                nameAction={
+                    <Button
+                        variant="ghost"
+                        icon={Flag}
+                        iconOnly
+                        aria-label="Пожаловаться"
+                        title="Пожаловаться"
+                        onClick={() => {
+                            setReportNotice('')
+                            setIsReportOpen(true)
+                        }}
                     />
-                )}
-                <div className={styles.info}>
-                    <h1>{profile.last_name} {profile.first_name} {profile.patronymic || ''}</h1>
-                    <p className={styles.username}>@{profile.username}</p>
-                    {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
-                    {profile.birthday && (
-                        <p className={styles.birthday}>🎂 {new Date(profile.birthday).toLocaleDateString('ru-RU')}</p>
-                    )}
+                }
+                actions={
+                    <>
+                        {relationActions[relation]}
+                        <Button variant="secondary" icon={MessageCircle} onClick={handleMessage}>
+                            Написать сообщение
+                        </Button>
+                    </>
+                }
+            />
 
-                    <div className={styles.statsRow}>
-                        <div className={styles.statBlock} style={{cursor: 'pointer'}} onClick={() => navigate(`/users/${profile.id}/friends`)}>
-                            <span className={styles.statValue}>{friendCount}</span>
-                            <span className={styles.statLabel}>Друзья</span>
-                        </div>
-                        <div className={styles.statBlock}>
-                            <span className={styles.statValue}>{posts.length}</span>
-                            <span className={styles.statLabel}>Постов</span>
-                        </div>
-                        {/* {profile.created_at && (
-                            <div className={styles.statBlock}>
-                                <span className={styles.statValue}>
-                                    {new Date(profile.created_at).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
-                                </span>
-                                <span className={styles.statLabel}>На платформе с</span>
-                            </div>
-                        )} */}
-                    </div>
+            {profile.is_banned && (
+                <Alert tone="error">
+                    Аккаунт заблокирован администрацией — публикации и общение недоступны.
+                </Alert>
+            )}
 
-                    <div className={styles.actionsRow}>
-                        {relation === 'none' && (
-                            <button className={styles.addBtn} onClick={handleSendRequest}>Добавить в друзья</button>
-                        )}
-                        {relation === 'outgoing' && (
-                            <button className={styles.declineBtn} onClick={handleDecline}>Отменить заявку</button>
-                        )}
-                        {relation === 'incoming' && (
-                            <>
-                                <button className={styles.addBtn} onClick={handleAccept}>Принять заявку</button>
-                                <button className={styles.declineBtn} onClick={handleDecline}>Отклонить</button>
-                            </>
-                        )}
-                        {relation === 'friends' && (
-                            <button className={styles.declineBtn} onClick={handleRemoveFriend}>Удалить из друзей</button>
-                        )}
-                        <button className={styles.messageBtn} onClick={handleMessage}>Написать сообщение</button>
-                    </div>
-                </div>
-            </div>
+            {isReportOpen && (
+                <ReportModal
+                    target={profile}
+                    subject="Профиль"
+                    onClose={() => setIsReportOpen(false)}
+                    onSubmitted={() => setReportNotice('Жалоба отправлена администраторам')}
+                />
+            )}
+
+            {reportNotice && <Alert tone="success">{reportNotice}</Alert>}
+
+            {isZoomOpen && profile.avatar_url && (
+                <ImageZoomModal
+                    src={resolveAvatarUrl(profile.avatar_url)}
+                    onClose={() => setIsZoomOpen(false)}
+                />
+            )}
 
             <h2 className={styles.postsTitle}>Посты</h2>
             <div className={styles.feed}>
-                {posts.length === 0 && <p className={styles.empty}>Пока нет постов</p>}
+                {posts.length === 0 && (
+                    <EmptyState
+                        icon={FileText}
+                        title="Пока нет постов"
+                        description="Публикации этого пользователя появятся здесь."
+                    />
+                )}
                 <PostModeration posts={posts} setPosts={setPosts}>
                     {posts.map(post => (
                         <PostCard key={post.id} post={post} author={post.author} />

@@ -1,97 +1,229 @@
-.header {
-    background: rgba(241, 240, 234, 0.82);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--color-line);
+/* The bar is sticky and fades the page out beneath it; the inner
+   header is the floating glass pill. */
+
+.bar {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: var(--z-header);
+    padding: var(--space-3) var(--space-5) 0;
+    /* Fade for content scrolling underneath, so the pill does not
+       need a hard bottom edge. */
+    background: linear-gradient(
+        180deg,
+        var(--canvas) 0%,
+        color-mix(in srgb, var(--canvas) 82%, transparent) 62%,
+        transparent 100%
+    );
 }
 
-.inner {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 12px 24px;
+.header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: var(--space-4);
+    max-width: var(--shell-max);
+    margin: 0 auto;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
 }
+
+/* ---- Logo ---- */
 
 .logo {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 17px;
-    letter-spacing: -0.01em;
-    color: var(--color-ink);
-    text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    text-decoration: none;
 }
 
-.logo::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-moss);
+.mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    background: linear-gradient(140deg, var(--green-bright), var(--green-deep));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 4px 12px -4px var(--green);
+    transition: transform var(--dur-base) var(--ease);
 }
+
+.logo:hover .mark {
+    transform: rotate(-8deg) scale(1.05);
+}
+
+.wordmark {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+/* ---- Nav ---- */
 
 .nav {
     display: flex;
     align-items: center;
-    gap: 4px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-full);
-    padding: 4px;
-}
-
-.link,
-.active {
-    padding: 8px 16px;
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: var(--font-body);
-    transition: color 0.15s ease, background 0.15s ease;
+    gap: 2px;
 }
 
 .link {
-    color: var(--color-ink-soft);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 7px 14px;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink-soft);
+    transition:
+        color var(--dur-fast) var(--ease),
+        background var(--dur-fast) var(--ease),
+        box-shadow var(--dur-base) var(--ease);
+}
+
+.icon {
+    width: 18px;
+    height: 18px;
 }
 
 .link:hover {
-    color: var(--color-ink);
-    background: var(--color-line-soft);
+    color: var(--ink);
+    background: var(--glass-tint-quiet);
 }
 
 .active {
-    color: #fff;
-    background: var(--color-moss);
+    color: var(--green-on);
+    background: var(--green);
+    box-shadow: 0 6px 16px -8px var(--green);
+}
+
+.active:hover {
+    color: var(--green-on);
+    background: var(--green-deep);
+}
+
+/* ---- Profile ---- */
+
+/* ---- Right-hand actions ---- */
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+/* Hide navbar entirely when viewing a specific chat (/chats/:id) */
+.bar[data-hidden='true'] {
+    display: none !important;
 }
 
 .profileLink {
-    margin-left: 4px;
     display: flex;
-    border-radius: 50%;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    transition: box-shadow var(--dur-fast) var(--ease);
 }
 
-.profileLink img {
-    display: block;
-    box-shadow: 0 0 0 1.5px var(--color-line);
-    transition: box-shadow 0.15s ease;
+.profileLink:hover {
+    box-shadow: 0 0 0 2px var(--green);
 }
 
-.profileLink:hover img {
-    box-shadow: 0 0 0 1.5px var(--color-moss);
-}
+/* ---- Responsive: nav docks to the bottom edge as a tab bar ----
+   Below 700px the nav leaves the header row (which keeps just the logo
+   mark and the profile controls) and becomes a thumb-reachable tab bar.
+   Labels come back — there is room for them vertically, and without
+   them the bar is just four unlabelled glyphs. */
 
-@media (max-width: 768px) {
-    .inner {
-        gap: 10px;
+@media (max-width: 700px) {
+    .bar {
+        position: fixed !important;
+        inset: auto 0 0 !important;
+        top: auto !important;
+        padding: var(--space-2) var(--space-3)
+            calc(var(--space-2) + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--glass-ring);
+        background: var(--glass-tint-strong);
+        backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+        box-shadow: 0 -10px 28px -18px var(--ink);
+    }
+
+    .header {
+        gap: var(--space-2);
+        padding-left: var(--space-3);
+        padding-right: var(--space-3);
+    }
+
+    .wordmark {
+        display: none;
+    }
+
+    .mark {
+        display: none;
+    }
+
+    .logo {
+        display: none;
+    }
+
+    .nav {
+        position: static;
+        justify-content: space-around;
+        flex: 1;
+        gap: var(--space-1);
+        padding: 0;
+        border-top: none;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: none;
+    }
+
+    .link {
         flex-direction: column;
+        gap: 3px;
+        padding: 6px var(--space-3);
+        border-radius: var(--radius-md);
+    }
+
+    .link:hover {
+        background: transparent;
+    }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .label {
+        display: block;
+        font-size: var(--text-xs);
+        line-height: 1.2;
+    }
+
+    /* A solid pill per item would read as a row of buttons; the tab
+       bar wants a tint plus green text for the current section. */
+    .active {
+        color: var(--green);
+        background: var(--green-tint);
+        box-shadow: none;
+    }
+
+    .active:hover {
+        color: var(--green-deep);
+        background: var(--green-tint-strong);
+        box-shadow: none;
+    }
+
+    .actions {
+        display: none;
+    }
+
+    .themeSwitcherDesktop {
+        display: none;
     }
 }

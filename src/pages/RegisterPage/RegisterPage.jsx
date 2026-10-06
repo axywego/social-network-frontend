@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Camera, UserPlus } from 'lucide-react'
 import { authService } from '../../services/authService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
-import styles from './RegisterPage.module.css'
 import Avatar from '../../components/Avatar'
 import { validateImageFile } from '../../utils/imageFile'
+import { todayIso, validateBirthday } from '../../utils/birthday'
+import AuthShell from '../../components/ui/AuthShell'
+import Button from '../../components/ui/Button'
+import Field from '../../components/ui/Field'
+import Alert from '../../components/ui/Alert'
+import styles from './RegisterPage.module.css'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -90,6 +96,13 @@ function RegisterPage() {
             return
         }
 
+        const birthdayError = validateBirthday(dataToSend.birthday)
+        if (birthdayError) {
+            setError(birthdayError)
+            setLoading(false)
+            return
+        }
+
         try {
             await authService.register(dataToSend)
 
@@ -121,128 +134,123 @@ function RegisterPage() {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.card}>
-                <h1 className={styles.title}>Регистрация</h1>
-
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    <div className={styles.field} style={{ textAlign: 'center' }}>
-                        <button type="button" onClick={handleAvatarClick} aria-label="Выбрать аватар" style={{ cursor: 'pointer', display: 'inline-block', border: 0, background: 'none' }}>
-                            {avatarPreview ? (
-                                // Avatar-компонент не умеет в blob: URL (он всегда клеит API_URL),
-                                // поэтому локальное превью рендерим обычным img напрямую
-                                <img
-                                    src={avatarPreview}
-                                    alt="avatar preview"
-                                    width={150}
-                                    height={150}
-                                    style={{ borderRadius: '50%', objectFit: 'cover' }}
-                                />
-                            ) : (
-                                <Avatar avatarUrl={null} size={150} />
-                            )}
-                        </button>
-                        <input
-                            id="avatar-input"
-                            ref={avatarInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-username">Логин *</label>
-                        <input
-                            id="register-username"
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                            placeholder="Придумайте логин"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-password">Пароль *</label>
-                        <input
-                            id="register-password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            placeholder="Придумайте пароль"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-first-name">Имя *</label>
-                        <input
-                            id="register-first-name"
-                            type="text"
-                            name="first_name"
-                            value={formData.first_name}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ваше имя"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-last-name">Фамилия *</label>
-                        <input
-                            id="register-last-name"
-                            type="text"
-                            name="last_name"
-                            value={formData.last_name}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ваша фамилия"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-patronymic">Отчество</label>
-                        <input
-                            id="register-patronymic"
-                            type="text"
-                            name="patronymic"
-                            value={formData.patronymic}
-                            onChange={handleChange}
-                            placeholder="Ваше отчество (необязательно)"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="register-birthday">Дата рождения</label>
-                        <input
-                            id="register-birthday"
-                            type="date"
-                            name="birthday"
-                            value={formData.birthday}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {error && <div className={styles.error} role="alert">{error}</div>}
-
-                    <button
-                        type="submit"
-                        className={styles.button}
-                        disabled={loading}
-                    >
-                        {loading ? 'Регистрация...' : 'Зарегистрироваться'}
-                    </button>
-                </form>
-
-                <p className={styles.link}>
+        <AuthShell
+            title="Создать аккаунт"
+            subtitle="Пара полей — и вы в ленте"
+            footer={
+                <>
                     Уже есть аккаунт? <Link to="/login">Войти</Link>
-                </p>
-            </div>
-        </div>
+                </>
+            }
+        >
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <div className={styles.avatarRow}>
+                    <button
+                        type="button"
+                        className={styles.avatarButton}
+                        onClick={handleAvatarClick}
+                        aria-label="Выбрать аватар"
+                    >
+                        {avatarPreview ? (
+                            // Avatar-компонент не умеет в blob: URL (он всегда клеит API_URL),
+                            // поэтому локальное превью рендерим обычным img напрямую
+                            <img className={styles.avatarPreview} src={avatarPreview} alt="" width={104} height={104} />
+                        ) : (
+                            <Avatar avatarUrl={null} size={104} />
+                        )}
+                        <span className={styles.avatarBadge} aria-hidden="true">
+                            <Camera />
+                        </span>
+                    </button>
+                    <input
+                        id="avatar-input"
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="visually-hidden"
+                    />
+                </div>
+
+                <div className={styles.grid}>
+                    <Field
+                        label="Имя"
+                        name="first_name"
+                        type="text"
+                        autoComplete="given-name"
+                        value={formData.first_name}
+                        onChange={handleChange}
+                        required
+                        placeholder="Ваше имя"
+                    />
+                    <Field
+                        label="Фамилия"
+                        name="last_name"
+                        type="text"
+                        autoComplete="family-name"
+                        value={formData.last_name}
+                        onChange={handleChange}
+                        required
+                        placeholder="Ваша фамилия"
+                    />
+                </div>
+
+                <Field
+                    label="Отчество"
+                    name="patronymic"
+                    type="text"
+                    autoComplete="additional-name"
+                    value={formData.patronymic}
+                    onChange={handleChange}
+                    placeholder="Необязательно"
+                />
+
+                <Field
+                    label="Логин"
+                    name="username"
+                    type="text"
+                    autoComplete="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    placeholder="Только латиница, 5–32 символа"
+                />
+
+                <Field
+                    label="Пароль"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    placeholder="Минимум 8 символов, без пробелов"
+                />
+
+                <Field
+                    label="Дата рождения"
+                    name="birthday"
+                    type="date"
+                    value={formData.birthday}
+                    max={todayIso()}
+                    onChange={handleChange}
+                    hint="Необязательно"
+                />
+
+                {error && <Alert>{error}</Alert>}
+
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    block
+                    icon={UserPlus}
+                    disabled={loading}
+                >
+                    {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+                </Button>
+            </form>
+        </AuthShell>
     )
 }
 

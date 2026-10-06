@@ -1,17 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { Search, UserSearch, UserX, Users } from 'lucide-react'
 import { friendService } from '../../services/friendService'
 import { userService } from '../../services/userService'
 import { useAuthContext } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationContext'
+import UserRow, { AcceptButton, DeclineButton, RemoveButton } from './UserRow'
+import PageHeader from '../../components/ui/PageHeader'
+import Spinner from '../../components/ui/Spinner'
+import EmptyState from '../../components/ui/EmptyState'
+import Alert from '../../components/ui/Alert'
+import Button from '../../components/ui/Button'
 import styles from './FriendsPage.module.css'
-import Avatar from '../../components/Avatar'
 
-const TABS = { FRIENDS: 'friends', INCOMING: 'incoming', OUTGOING: 'outgoing', SEARCH: 'search' }
+const TABS = { FRIENDS: 'friends', INCOMING: 'incoming', OUTGOING: 'outgoing' }
 const SEARCH_LIMIT = 20
 
 function FriendsPage() {
     const { userId: routeUserId } = useParams()
     const { currentUser } = useAuthContext()
+    const { isUserOnline } = useNotifications()
 
     // Если параметра нет в роуте (маршрут /friends) — это моя страница друзей.
     // Сравнение через String(), т.к. id из URL всегда строка, а currentUser.id может быть числом.
@@ -19,6 +27,7 @@ function FriendsPage() {
     const isOwnPage = !routeUserId || String(routeUserId) === String(currentUser?.id)
 
     const [activeTab, setActiveTab] = useState(TABS.FRIENDS)
+    const [searching, setSearching] = useState(false)
 
     // Мои собственные отношения — нужны ВСЕГДА (даже на чужой странице),
     // чтобы корректно рисовать кнопки "Добавить"/"Удалить" относительно себя
@@ -46,8 +55,8 @@ function FriendsPage() {
     useEffect(() => {
         setActiveTab(TABS.FRIENDS)
         setQuery('')
+        setSearching(false)
         loadAll()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [targetUserId])
 
     const loadAll = async () => {
@@ -123,7 +132,6 @@ function FriendsPage() {
             runSearch(query.trim(), 0)
         }, 300)
         return () => clearTimeout(timer)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, runSearch, isOwnPage])
 
     const loadMoreResults = () => {
@@ -189,138 +197,168 @@ function FriendsPage() {
         const status = relationStatus(user.id)
         if (status === 'self') return null
         if (status === 'friends') {
-            return <button className={styles.removeBtn} onClick={() => handleRemoveFriend(user.username)}>Удалить</button>
+            return <RemoveButton onClick={() => handleRemoveFriend(user.username)} />
         }
         if (status === 'incoming') {
             return (
-                <div className={styles.actions}>
-                    <button className={styles.acceptBtn} onClick={() => handleAccept(user.username)}>Принять</button>
-                    <button className={styles.declineBtn} onClick={() => handleDecline(user.username)}>Отклонить</button>
-                </div>
+                <>
+                    <AcceptButton onClick={() => handleAccept(user.username)} />
+                    <DeclineButton onClick={() => handleDecline(user.username)} />
+                </>
             )
         }
         if (status === 'outgoing') {
-            return <button className={styles.declineBtn} onClick={() => handleDecline(user.username)}>Отменить</button>
+            return <DeclineButton label="Отменить" onClick={() => handleDecline(user.username)} />
         }
-        return <button className={styles.addBtn} onClick={() => handleSendRequest(user.username)}>Добавить</button>
+        return (
+            <Button variant="primary" size="sm" onClick={() => handleSendRequest(user.username)}>
+                Добавить
+            </Button>
+        )
     }
 
     if (loading) {
-        return <div className={styles.container}><div className={styles.loading}>Загрузка...</div></div>
+        return (
+            <div className={styles.container}>
+                <Spinner label="Загружаем друзей" />
+            </div>
+        )
     }
+
+    const targetName = targetProfile
+        ? `${targetProfile.first_name} ${targetProfile.last_name}`.trim()
+        : ''
+
+    const TAB_ITEMS = [
+        { id: TABS.FRIENDS, label: 'Друзья', count: myFriends.length },
+        { id: TABS.INCOMING, label: 'Входящие', count: incoming.length },
+        { id: TABS.OUTGOING, label: 'Исходящие', count: outgoing.length },
+    ]
 
     return (
         <div className={styles.container}>
-            <h1>
-                {isOwnPage
-                    ? 'Друзья'
-                    : `Друзья: ${targetProfile ? `${targetProfile.first_name} ${targetProfile.last_name}` : ''}`}
-            </h1>
+            <PageHeader
+                title={isOwnPage ? 'Друзья' : `Друзья: ${targetName}`}
+                subtitle={isOwnPage ? 'Управляйте списками друзей и заявками' : undefined}
+            />
 
             {isOwnPage && (
-                <input
-                    aria-label="Поиск пользователей"
-                    type="text"
-                    className={styles.searchInput}
-                    placeholder="Поиск по логину, имени или фамилии..."
-                    value={query}
-                    onChange={(e) => { setQuery(e.target.value); setActiveTab(TABS.SEARCH) }}
-                />
-            )}
-
-            {error && <div className={styles.error}>{error}</div>}
-
-            {isOwnPage && activeTab !== TABS.SEARCH && (
-                <div className={styles.tabs}>
-                    <button className={activeTab === TABS.FRIENDS ? styles.tabActive : styles.tab} onClick={() => setActiveTab(TABS.FRIENDS)}>
-                        Друзья ({myFriends.length})
-                    </button>
-                    <button className={activeTab === TABS.INCOMING ? styles.tabActive : styles.tab} onClick={() => setActiveTab(TABS.INCOMING)}>
-                        Входящие ({incoming.length})
-                    </button>
-                    <button className={activeTab === TABS.OUTGOING ? styles.tabActive : styles.tab} onClick={() => setActiveTab(TABS.OUTGOING)}>
-                        Исходящие ({outgoing.length})
-                    </button>
+                <div className={styles.search}>
+                    <Search className={styles.searchIcon} aria-hidden="true" />
+                    <label className="visually-hidden" htmlFor="friend-search">Поиск пользователей</label>
+                    <input
+                        id="friend-search"
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Поиск по логину, имени или фамилии..."
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value)
+                            setSearching(Boolean(e.target.value.trim()))
+                        }}
+                    />
                 </div>
             )}
 
-            {isOwnPage && activeTab === TABS.SEARCH && (
-                <div className={styles.list}>
-                    {!searchLoading && searchResults.length === 0 && <p className={styles.empty}>Никого не найдено</p>}
-                    {searchResults.map(user => (
-                        <div key={user.id} className={styles.item}>
-                            <Link className={styles.clickable} to={`/users/${user.id}`}>
-                                <Avatar avatarUrl={user.avatar_url} size={52} />
-                                <div className={styles.info}>
-                                    <div className={styles.name}>{user.first_name} {user.last_name}</div>
-                                    <div className={styles.username}>@{user.username}</div>
-                                </div>
-                            </Link>
-                            {renderActionButton(user)}
-                        </div>
+            {error && <Alert>{error}</Alert>}
+
+            {isOwnPage && !searching && (
+                <div className={styles.tabs} role="tablist" aria-label="Списки друзей">
+                    {TAB_ITEMS.map(item => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeTab === item.id}
+                            className={`${styles.tab} ${activeTab === item.id ? styles.tabActive : ''}`}
+                            onClick={() => setActiveTab(item.id)}
+                        >
+                            {item.label}
+                            <span className={styles.tabCount}>{item.count}</span>
+                        </button>
                     ))}
-                    {searchLoading && <p className={styles.empty}>Ищем...</p>}
-                    {!searchLoading && searchResults.length < searchTotal && (
-                        <button className={styles.tab} onClick={loadMoreResults}>Показать ещё</button>
+                </div>
+            )}
+
+            {searching && (
+                <div className={styles.list}>
+                    {!searchLoading && searchResults.length === 0 && (
+                        <EmptyState
+                            icon={UserSearch}
+                            title="Никого не найдено"
+                            description="Попробуйте изменить запрос."
+                        />
+                    )}
+
+                    {searchResults.map(user => (
+                        <UserRow
+                            key={user.id}
+                            user={user}
+                            online={isUserOnline(user.id)}
+                            actions={renderActionButton}
+                        />
+                    ))}
+
+                    {searchLoading && <Spinner label="Ищем" />}
+
+                    {!searchLoading && searchResults.length > 0 && searchResults.length < searchTotal && (
+                        <Button variant="secondary" size="sm" onClick={loadMoreResults}>
+                            Показать ещё
+                        </Button>
                     )}
                 </div>
             )}
 
-            {(!isOwnPage || activeTab === TABS.FRIENDS) && (
+            {!searching && (!isOwnPage || activeTab === TABS.FRIENDS) && (
                 <div className={styles.list}>
                     {displayedFriends.length === 0 && (
-                        <p className={styles.empty}>{isOwnPage ? 'Пока нет друзей' : 'У пользователя пока нет друзей'}</p>
+                        <EmptyState
+                            icon={Users}
+                            title={isOwnPage ? 'Пока нет друзей' : 'У пользователя пока нет друзей'}
+                            description={
+                                isOwnPage
+                                    ? 'Найдите людей через поиск и отправьте им заявку.'
+                                    : undefined
+                            }
+                        />
                     )}
                     {displayedFriends.map(friend => (
-                        <div key={friend.id} className={styles.item}>
-                            <Link className={styles.clickable} to={`/users/${friend.id}`}>
-                                <Avatar avatarUrl={friend.avatar_url} size={52} />
-                                <div className={styles.info}>
-                                    <div className={styles.name}>{friend.first_name} {friend.last_name}</div>
-                                    <div className={styles.username}>@{friend.username}</div>
-                                </div>
-                            </Link>
-                            {renderActionButton(friend)}
-                        </div>
+                        <UserRow
+                            key={friend.id}
+                            user={friend}
+                            online={isUserOnline(friend.id)}
+                            actions={renderActionButton}
+                        />
                     ))}
                 </div>
             )}
 
-            {isOwnPage && activeTab === TABS.INCOMING && (
+            {!searching && isOwnPage && activeTab === TABS.INCOMING && (
                 <div className={styles.list}>
-                    {incoming.length === 0 && <p className={styles.empty}>Нет входящих заявок</p>}
+                    {incoming.length === 0 && (
+                        <EmptyState
+                            icon={UserX}
+                            title="Нет входящих заявок"
+                            description="Заявки на добавление появятся здесь."
+                        />
+                    )}
                     {incoming.map(req => (
-                        <div key={req.user.id} className={styles.item}>
-                            <Link className={styles.clickable} to={`/users/${req.user.id}`}>
-                                <Avatar avatarUrl={req.user.avatar_url} size={52} />
-                                <div className={styles.info}>
-                                    <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
-                                    <div className={styles.username}>@{req.user.username}</div>
-                                </div>
-                            </Link>
-                            <div className={styles.actions}>
-                                <button className={styles.acceptBtn} onClick={() => handleAccept(req.user.username)}>Принять</button>
-                                <button className={styles.declineBtn} onClick={() => handleDecline(req.user.username)}>Отклонить</button>
-                            </div>
-                        </div>
+                        <UserRow key={req.user.id} user={req.user} actions={renderActionButton} />
                     ))}
                 </div>
             )}
 
-            {isOwnPage && activeTab === TABS.OUTGOING && (
+            {!searching && isOwnPage && activeTab === TABS.OUTGOING && (
                 <div className={styles.list}>
-                    {outgoing.length === 0 && <p className={styles.empty}>Нет исходящих заявок</p>}
+                    {outgoing.length === 0 && (
+                        <EmptyState
+                            icon={UserX}
+                            title="Нет исходящих заявок"
+                            description="Здесь собраны отправленные вами заявки."
+                        />
+                    )}
                     {outgoing.map(req => (
-                        <div key={req.user.id} className={styles.item}>
-                            <Link className={styles.clickable} to={`/users/${req.user.id}`}>
-                                <Avatar avatarUrl={req.user.avatar_url} size={52} />
-                                <div className={styles.info}>
-                                    <div className={styles.name}>{req.user.first_name} {req.user.last_name}</div>
-                                    <div className={styles.username}>@{req.user.username}</div>
-                                </div>
-                            </Link>
-                            <button className={styles.declineBtn} onClick={() => handleDecline(req.user.username)}>Отменить</button>
-                        </div>
+                        <UserRow key={req.user.id} user={req.user} actions={renderActionButton} />
                     ))}
                 </div>
             )}

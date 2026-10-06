@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
+import styles from './ImageZoomModal.module.css'
 
 export default function ImageZoomModal({ src, onClose }) {
     const imgRef = useRef(null)
@@ -21,7 +22,6 @@ export default function ImageZoomModal({ src, onClose }) {
         if (!imgRef.current) return
         const { scale, x, y } = transform.current
         imgRef.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`
-        imgRef.current.style.cursor = scale > 1 ? "grab" : "zoom-in"
     }, [])
 
     useEffect(() => {
@@ -82,7 +82,6 @@ export default function ImageZoomModal({ src, onClose }) {
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false)
-        if (imgRef.current) imgRef.current.style.cursor = transform.current.scale > 1 ? "grab" : "zoom-in"
     }, [])
 
     useEffect(() => {
@@ -113,46 +112,30 @@ export default function ImageZoomModal({ src, onClose }) {
 
     const modal = (
         <div
+            className={styles.overlay}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Просмотр изображения"
             onMouseDown={handleOverlayMouseDown}
             onWheel={handleWheel}
-            style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 1000,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "rgba(0, 0, 0, 0.9)",
-                userSelect: "none",
-                touchAction: "none",
-            }}
         >
-            <div
-                onMouseDown={(e) => e.stopPropagation()}
-                style={{ position: "absolute", top: 16, right: 16, display: "flex", gap: 8, zIndex: 10 }}
-            >
-                <IconButton onClick={() => zoomBy(1.3)} label="Увеличить"><ZoomIn size={18} /></IconButton>
-                <IconButton onClick={() => zoomBy(1 / 1.3)} label="Уменьшить"><ZoomOut size={18} /></IconButton>
-                <IconButton onClick={resetView} label="Сбросить"><RotateCcw size={18} /></IconButton>
-                <IconButton onClick={onClose} label="Закрыть"><X size={18} /></IconButton>
+            <div className={styles.toolbar} onMouseDown={(e) => e.stopPropagation()}>
+                <IconButton onClick={() => zoomBy(1.3)} label="Увеличить"><ZoomIn /></IconButton>
+                <IconButton onClick={() => zoomBy(1 / 1.3)} label="Уменьшить"><ZoomOut /></IconButton>
+                <IconButton onClick={resetView} label="Сбросить"><RotateCcw /></IconButton>
+                <IconButton onClick={onClose} label="Закрыть"><X /></IconButton>
             </div>
 
             <img
                 ref={imgRef}
+                className={styles.image}
                 src={src}
                 alt=""
                 draggable={false}
                 onMouseDown={handleMouseDown}
-                style={{
-                    maxWidth: "85vw",
-                    maxHeight: "85vh",
-                    objectFit: "contain",
-                    cursor: "zoom-in",
-                    willChange: "transform",
-                }}
             />
 
-            <p style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", color: "rgba(255,255,255,0.5)", fontSize: 14, margin: 0 }}>
+            <p className={styles.hint}>
                 Колесо мыши — зум · перетаскивание — сдвиг · клик за фото — закрыть
             </p>
         </div>
@@ -163,19 +146,7 @@ export default function ImageZoomModal({ src, onClose }) {
 
 function IconButton({ onClick, label, children }) {
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            aria-label={label}
-            style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: 8, borderRadius: 8, border: "none",
-                background: "rgba(255,255,255,0.1)", color: "white", cursor: "pointer",
-                transition: "background-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-        >
+        <button type="button" className={styles.iconBtn} onClick={onClick} aria-label={label}>
             {children}
         </button>
     )

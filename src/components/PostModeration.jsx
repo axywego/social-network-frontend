@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { postService } from '../services/postService'
 import { PostActionsProvider } from '../context/PostActionsContext'
-import styles from './PostModeration.module.css'
+import ReportModal from './ReportModal'
+import Alert from './ui/Alert'
 
 export default function PostModeration({ posts, setPosts, children }) {
     const [editingPostId, setEditingPostId] = useState(null)
     const [error, setError] = useState('')
+    const [notice, setNotice] = useState('')
+    const [reportedPost, setReportedPost] = useState(null)
 
     const handleEditPost = (post) => {
         setEditingPostId(post.id)
@@ -48,15 +51,17 @@ export default function PostModeration({ posts, setPosts, children }) {
         }
     }
 
-    const handleReportPost = async (post) => {
+    // Complaints are filed against the author, so the post only tells
+    // us who to blame — the reason is picked in the modal.
+    const handleReportPost = useCallback((post) => {
         setError('')
-        try {
-            await postService.reportPost(post.id)
-        } catch (err) {
-            console.error(err)
-            setError('Не удалось отправить жалобу. Попробуйте ещё раз.')
-        }
-    }
+        setNotice('')
+        setReportedPost(post)
+    }, [])
+
+    const handleReported = useCallback(() => {
+        setNotice('Жалоба отправлена администраторам')
+    }, [])
 
     return (
         <PostActionsProvider
@@ -67,8 +72,18 @@ export default function PostModeration({ posts, setPosts, children }) {
             onSaveEdit={handleSaveEdit}
             onCancelEdit={handleCancelEdit}
         >
-            {error && <p className={styles.error} role="alert">{error}</p>}
+            {error && <Alert>{error}</Alert>}
+            {notice && <Alert tone="success">{notice}</Alert>}
             {children}
+
+            {reportedPost && (
+                <ReportModal
+                    target={reportedPost.author}
+                    subject="Пост"
+                    onClose={() => setReportedPost(null)}
+                    onSubmitted={handleReported}
+                />
+            )}
         </PostActionsProvider>
     )
 }

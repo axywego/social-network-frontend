@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { authService } from '../../services/authService'
 import { useAuthContext } from '../../context/AuthContext'
+import AuthShell from '../../components/ui/AuthShell'
+import Button from '../../components/ui/Button'
+import Field from '../../components/ui/Field'
+import Alert from '../../components/ui/Alert'
 import styles from './LoginPage.module.css'
 
 function LoginPage() {
@@ -43,53 +48,45 @@ function LoginPage() {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.card}>
-                <h1 className={styles.title}>Вход</h1>
-                
-                {error && <div className={styles.error} role="alert">{error}</div>}
-                
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    <div className={styles.field}>
-                        <label htmlFor="login-username">Логин</label>
-                        <input
-                            id="login-username"
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                            placeholder="Введите логин"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="login-password">Пароль</label>
-                        <input
-                            id="login-password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            placeholder="Введите пароль"
-                        />
-                    </div>
-
-                    <button 
-                        type="submit" 
-                        className={styles.button}
-                        disabled={loading}
-                    >
-                        {loading ? 'Вход...' : 'Войти'}
-                    </button>
-                </form>
-
-                <p className={styles.link}>
+        <AuthShell
+            title="С возвращением"
+            subtitle="Войдите, чтобы продолжить общение"
+            footer={
+                <>
                     Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-                </p>
-            </div>
-        </div>
+                </>
+            }
+        >
+            {error && <Alert>{error}</Alert>}
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <Field
+                    label="Логин"
+                    name="username"
+                    type="text"
+                    autoComplete="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    placeholder="Введите логин"
+                />
+
+                <Field
+                    label="Пароль"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    placeholder="Введите пароль"
+                />
+
+                <Button type="submit" variant="primary" size="lg" block icon={LogIn} disabled={loading}>
+                    {loading ? 'Входим...' : 'Войти'}
+                </Button>
+            </form>
+        </AuthShell>
     )
 }
 

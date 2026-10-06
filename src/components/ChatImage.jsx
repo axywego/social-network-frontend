@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { chatService } from '../services/chatService'
 import ImageZoomModal from './ImageZoomModal'
+import styles from './ChatImage.module.css'
 
 function ChatImage({ imageUrl, className, width, height }) {
     const [blob, setBlob] = useState(null)
@@ -28,7 +29,6 @@ function ChatImage({ imageUrl, className, width, height }) {
         }
     }, [width, height])
 
-
     useEffect(() => {
         let cancelled = false
         let loadedUrl = null
@@ -50,30 +50,31 @@ function ChatImage({ imageUrl, className, width, height }) {
         }
     }, [imageUrl])
 
-
     return (
         <div
-            className={className}
-            style={{
-                width: displaySize.width,
-                height: displaySize.height,
-                borderRadius: 8,
-                overflow: 'hidden',
-                background: '#eee'
-            }}
+            className={`${styles.frame} ${className ?? ''}`}
+            style={{ width: displaySize.width, height: displaySize.height }}
         >
-            {blobUrl && (
-                <button type="button" onClick={() => setIsZoomOpen(true)} aria-label="Открыть изображение чата" style={{ padding: 0, border: 0, background: 'none', width: '100%', height: '100%', cursor: 'zoom-in' }}>
+            {blobUrl ? (
+                <button
+                    type="button"
+                    className={styles.zoomBtn}
+                    onClick={() => setIsZoomOpen(true)}
+                    aria-label="Открыть изображение чата"
+                >
                     <img
+                        className={styles.image}
                         src={blobUrl}
                         alt="Изображение чата"
                         width={displaySize.width}
                         height={displaySize.height}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                 </button>
+            ) : (
+                <div className={styles.placeholder} aria-hidden="true" />
             )}
-            {isZoomOpen && (
+
+            {isZoomOpen && blobUrl && (
                 <ImageZoomModal
                     src={blobUrl}
                     onClose={() => setIsZoomOpen(false)}
