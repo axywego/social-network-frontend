@@ -3,10 +3,6 @@ import { Check, Palette } from 'lucide-react'
 import { useTheme, THEMES } from '../../context/ThemeContext'
 import styles from './ThemeSwitcher.module.css'
 
-/**
- * Preview colours for the palette picker. Two stops per theme is
- * enough to read the mood; the real palette lives in themes.css.
- */
 const SWATCHES = {
     system: 'linear-gradient(135deg, #EDF2ED 50%, #0A100C 50%)',
     day: 'linear-gradient(135deg, #FFFFFF, #2F7A4F)',
@@ -32,7 +28,6 @@ export default function ThemeSwitcher({ className = '' }) {
         if (restoreFocus) triggerRef.current?.focus()
     }, [])
 
-    // Dismiss on outside pointerdown.
     useEffect(() => {
         if (!open) return undefined
 
@@ -43,7 +38,6 @@ export default function ThemeSwitcher({ className = '' }) {
         return () => document.removeEventListener('pointerdown', handlePointerDown)
     }, [open, close])
 
-    // Escape closes and returns focus to the trigger.
     useEffect(() => {
         if (!open) return undefined
 
@@ -57,7 +51,6 @@ export default function ThemeSwitcher({ className = '' }) {
         return () => document.removeEventListener('keydown', handleKey)
     }, [open, close])
 
-    // Move focus into the menu so keyboard users are not stranded.
     useEffect(() => {
         if (open) menuRef.current?.querySelector('button')?.focus()
     }, [open])

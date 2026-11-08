@@ -1,9 +1,5 @@
 import styles from './Button.module.css'
 
-/**
- * variant: primary | secondary | ghost | danger
- * size:    sm | md | lg
- */
 export default function Button({
     variant = 'secondary',
     size = 'md',
@@ -17,9 +13,6 @@ export default function Button({
     ...rest
 }) {
     const classes = [
-        // Stable global hook so a page module can target the button
-        // (e.g. hide its label on narrow screens) without reaching
-        // into this module's hashed class names.
         'ui-button',
         styles.button,
         styles[variant],

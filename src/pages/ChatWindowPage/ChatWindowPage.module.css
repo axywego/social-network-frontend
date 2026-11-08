@@ -13,8 +13,6 @@
     overflow: hidden;
 }
 
-/* ---- Header ---- */
-
 .header {
     display: flex;
     align-items: center;
@@ -115,8 +113,6 @@
     flex-shrink: 0;
 }
 
-/* ---- Members panel ---- */
-
 .membersPanel {
     flex-shrink: 0;
     display: flex;
@@ -168,8 +164,6 @@
     color: var(--ink-faint);
 }
 
-/* ---- Message list ---- */
-
 .messagesWrapper {
     flex: 1;
     min-height: 0;
@@ -184,7 +178,6 @@
 }
 
 .headerSpacer {
-    /* Fixed height so toggling the label never shifts the list. */
     min-height: 34px;
     display: flex;
     align-items: center;
@@ -229,14 +222,11 @@
     min-width: 0;
     padding: 9px 14px;
     border-radius: var(--radius-lg);
-    /* Glass bubble for incoming, solid brand for outgoing — the
-       two-tone is what separates the two sides at a glance. */
     background: var(--glass-tint);
     backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
     -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
     border: 1px solid var(--glass-ring);
     box-shadow: var(--glass-shadow);
-    /* Long-press is how a message is opened on touch. */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -291,8 +281,6 @@
     margin-right: 4px;
     opacity: 0.75;
 }
-
-/* ---- Context menu ---- */
 
 .contextMenu {
     position: fixed;
@@ -359,8 +347,6 @@
     background: var(--danger-tint);
     color: var(--danger);
 }
-
-/* ---- Compose bar ---- */
 
 .inputBar {
     display: flex;
@@ -548,9 +534,6 @@
     flex-shrink: 0;
 }
 
-/* Full-bleed chat bypasses the page container, so it has to clear the
-   bottom tab bar itself. --nav-bar-height excludes the home-indicator
-   inset, hence the env() term. */
 @media (max-width: 700px) {
     .container {
         height: calc(
@@ -568,14 +551,10 @@
         max-width: 82%;
     }
 
-    /* The home-indicator inset is now handled by the container height,
-       which clears the bottom tab bar. */
     .inputBar {
         padding: var(--space-2) var(--space-3);
     }
 
-    /* Label does not fit next to the field on narrow screens; the
-       icon carries the meaning. */
     .sendBtn :global(.ui-button__label) {
         display: none;
     }

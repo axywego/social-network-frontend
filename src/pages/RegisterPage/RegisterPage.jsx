@@ -46,9 +46,6 @@ function RegisterPage() {
 
     const handleAvatarClick = () => avatarInputRef.current?.click()
 
-    // На этом шаге пользователя ещё не существует, поэтому файл
-    // не грузим на сервер, а только сохраняем локально и делаем превью.
-    // Реальная загрузка произойдёт в handleSubmit после успешного логина.
     const handleFileChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
@@ -76,14 +73,12 @@ function RegisterPage() {
             birthday: formData.birthday || null
         }
 
-        // Имя пользователя - только латиница, 5-32 символов
         if (!/^[a-zA-Z]{5,32}$/.test(dataToSend.username)) {
             setError('Имя пользователя должно содержать только латиницу (5-32 символов)!')
             setLoading(false)
             return
         }
 
-        // Пароль - любые символы, кроме пробелов, минимум 8 символов
         if (/\s/.test(dataToSend.password)) {
             setError('Пароль не может содержать пробелы!')
             setLoading(false)
@@ -115,7 +110,6 @@ function RegisterPage() {
                     await refreshUser()
                 } catch (avatarErr) {
                     console.error('Ошибка загрузки аватара:', avatarErr)
-                    // не блокируем регистрацию из-за неудачной загрузки фото
                 }
             }
 
@@ -152,8 +146,6 @@ function RegisterPage() {
                         aria-label="Выбрать аватар"
                     >
                         {avatarPreview ? (
-                            // Avatar-компонент не умеет в blob: URL (он всегда клеит API_URL),
-                            // поэтому локальное превью рендерим обычным img напрямую
                             <img className={styles.avatarPreview} src={avatarPreview} alt="" width={104} height={104} />
                         ) : (
                             <Avatar avatarUrl={null} size={104} />

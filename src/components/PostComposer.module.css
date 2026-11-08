@@ -32,8 +32,6 @@
     outline: none;
 }
 
-/* ---- Image preview ---- */
-
 .previewWrap {
     position: relative;
     align-self: flex-start;
@@ -74,8 +72,6 @@
 .previewRemove:hover {
     background: rgba(16, 26, 20, 0.85);
 }
-
-/* ---- Actions ---- */
 
 .actions {
     display: flex;

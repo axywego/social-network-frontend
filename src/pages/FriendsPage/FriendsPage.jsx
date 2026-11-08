@@ -21,22 +21,16 @@ function FriendsPage() {
     const { currentUser } = useAuthContext()
     const { isUserOnline } = useNotifications()
 
-    // Если параметра нет в роуте (маршрут /friends) — это моя страница друзей.
-    // Сравнение через String(), т.к. id из URL всегда строка, а currentUser.id может быть числом.
     const targetUserId = routeUserId ?? currentUser?.id
     const isOwnPage = !routeUserId || String(routeUserId) === String(currentUser?.id)
 
     const [activeTab, setActiveTab] = useState(TABS.FRIENDS)
     const [searching, setSearching] = useState(false)
 
-    // Мои собственные отношения — нужны ВСЕГДА (даже на чужой странице),
-    // чтобы корректно рисовать кнопки "Добавить"/"Удалить" относительно себя
     const [myFriends, setMyFriends] = useState([])
     const [incoming, setIncoming] = useState([])
     const [outgoing, setOutgoing] = useState([])
 
-    // Список друзей, который непосредственно отображается на странице.
-    // На своей странице это = myFriends, на чужой — друзья targetUserId
     const [displayedFriends, setDisplayedFriends] = useState([])
 
     const [targetProfile, setTargetProfile] = useState(null)
@@ -120,7 +114,6 @@ function FriendsPage() {
         }
     }, [])
 
-    // debounce поискового запроса (только на своей странице)
     useEffect(() => {
         if (!isOwnPage) return
         if (!query.trim()) {
@@ -138,7 +131,6 @@ function FriendsPage() {
         runSearch(query.trim(), searchOffset + SEARCH_LIMIT)
     }
 
-    // Статус считается всегда относительно МЕНЯ (currentUser), а не владельца страницы
     const relationStatus = (userId) => {
         if (userId === currentUser?.id) return 'self'
         if (myFriends.some(f => f.id === userId)) return 'friends'

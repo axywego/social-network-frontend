@@ -6,8 +6,6 @@
     gap: var(--space-4);
 }
 
-/* ---- Search ---- */
-
 .search {
     position: relative;
     display: flex;
@@ -49,8 +47,6 @@
     background: var(--glass-tint-strong);
     box-shadow: 0 0 0 3px var(--green-tint);
 }
-
-/* ---- Segmented tabs ---- */
 
 .tabs {
     display: flex;
@@ -115,8 +111,6 @@
     background: var(--green-on);
     color: var(--green);
 }
-
-/* ---- Lists ---- */
 
 .list {
     display: flex;

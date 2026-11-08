@@ -21,8 +21,6 @@
     transform: translateY(-1px);
 }
 
-/* ---- Person (user lists) ---- */
-
 .person {
     display: flex;
     align-items: center;
@@ -61,8 +59,6 @@
     color: var(--ink-faint);
 }
 
-/* ---- Complaint ---- */
-
 .titles {
     display: flex;
     align-items: baseline;
@@ -93,8 +89,6 @@
     font-size: var(--text-xs);
     color: var(--ink-faint);
 }
-
-/* ---- Actions ---- */
 
 .actions {
     display: flex;

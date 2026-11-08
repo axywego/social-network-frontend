@@ -7,7 +7,6 @@ export default function ImageZoomModal({ src, onClose }) {
     const imgRef = useRef(null)
     const [isDragging, setIsDragging] = useState(false)
 
-    // Держим scale/position в ref — не в state, чтобы не ре-рендерить компонент
     const transform = useRef({ scale: 1, x: 0, y: 0 })
     const dragStart = useRef({ x: 0, y: 0 })
     const posStart = useRef({ x: 0, y: 0 })
@@ -17,7 +16,6 @@ export default function ImageZoomModal({ src, onClose }) {
 
     const clampScale = (s) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, s))
 
-    // Применяем transform напрямую к DOM-элементу — минуя React
     const applyTransform = useCallback(() => {
         if (!imgRef.current) return
         const { scale, x, y } = transform.current

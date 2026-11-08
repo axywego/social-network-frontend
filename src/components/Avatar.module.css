@@ -24,7 +24,5 @@
     height: var(--dot);
     border-radius: 50%;
     background: var(--success);
-    /* Ring matches the surface behind the avatar so the dot reads as
-       a cutout rather than a sticker. */
     border: 2px solid var(--surface);
 }

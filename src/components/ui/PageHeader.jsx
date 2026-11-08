@@ -1,6 +1,5 @@
 import styles from './PageHeader.module.css'
 
-/** Consistent page title + optional action row. */
 export default function PageHeader({ title, subtitle, action, className = '' }) {
     return (
         <div className={`${styles.header} ${className}`}>

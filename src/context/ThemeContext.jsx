@@ -1,10 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 
-/**
- * The selectable themes. `system` is not a palette — ThemeContext
- * resolves it to a concrete id (`day` / `night`) so CSS only ever
- * has to deal with real palettes.
- */
 export const THEMES = [
     { id: 'system', label: 'Как в системе' },
     { id: 'day', label: 'Светлая' },
@@ -29,7 +24,6 @@ function readStoredTheme() {
         const stored = localStorage.getItem(STORAGE_KEY)
         return isKnownTheme(stored) ? stored : 'system'
     } catch {
-        // Private mode / storage disabled — fall back to the OS.
         return 'system'
     }
 }
@@ -40,7 +34,6 @@ export function ThemeProvider({ children }) {
         () => typeof window !== 'undefined' && window.matchMedia(DARK_QUERY).matches
     )
 
-    // Track OS changes so `system` stays live without a reload.
     useEffect(() => {
         const mq = window.matchMedia(DARK_QUERY)
         const handleChange = (event) => setSystemDark(event.matches)
@@ -53,9 +46,6 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         const root = document.documentElement
 
-        // `data-switching` enables the colour transition in themes.css.
-        // It is added only on user-initiated switches and removed once
-        // the animation window closes, so first paint never fades in.
         const isUserSwitch = root.dataset.theme !== undefined
         if (isUserSwitch) {
             root.setAttribute('data-switching', '')
@@ -75,7 +65,7 @@ export function ThemeProvider({ children }) {
         try {
             localStorage.setItem(STORAGE_KEY, id)
         } catch {
-            // Persisting is best-effort; the theme still applies.
+            return
         }
     }, [])
 

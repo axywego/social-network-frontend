@@ -6,7 +6,6 @@
     gap: var(--space-5);
 }
 
-/* Small tap target over the avatar to open the full-size photo. */
 .avatarAction {
     position: absolute;
     inset: 0;

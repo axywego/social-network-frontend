@@ -6,8 +6,6 @@
     gap: var(--space-4);
 }
 
-/* ---- New group ---- */
-
 .groupForm {
     display: flex;
     align-items: flex-end;
@@ -24,8 +22,6 @@
 .groupInput {
     border-radius: var(--radius-full);
 }
-
-/* ---- List ---- */
 
 .chatList {
     display: flex;
@@ -84,8 +80,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-/* ---- Start a conversation ---- */
 
 .friendsSection {
     display: flex;

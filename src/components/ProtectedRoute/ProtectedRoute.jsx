@@ -6,7 +6,6 @@ function ProtectedRoute({ children }) {
     const { isAuthenticated } = useAuthContext()
 
     if (!isAuthenticated) {
-        // A ban recorded in this tab outranks the plain login redirect.
         return <Navigate to={getBanInfo() ? BAN_PATH : '/login'} replace />
     }
 

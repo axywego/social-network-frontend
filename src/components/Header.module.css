@@ -1,13 +1,8 @@
-/* The bar is sticky and fades the page out beneath it; the inner
-   header is the floating glass pill. */
-
 .bar {
     position: sticky;
     top: 0;
     z-index: var(--z-header);
     padding: var(--space-3) var(--space-5) 0;
-    /* Fade for content scrolling underneath, so the pill does not
-       need a hard bottom edge. */
     background: linear-gradient(
         180deg,
         var(--canvas) 0%,
@@ -26,8 +21,6 @@
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     border-radius: var(--radius-full);
 }
-
-/* ---- Logo ---- */
 
 .logo {
     display: flex;
@@ -59,8 +52,6 @@
     letter-spacing: -0.02em;
     color: var(--ink);
 }
-
-/* ---- Nav ---- */
 
 .nav {
     display: flex;
@@ -105,10 +96,6 @@
     background: var(--green-deep);
 }
 
-/* ---- Profile ---- */
-
-/* ---- Right-hand actions ---- */
-
 .actions {
     display: flex;
     align-items: center;
@@ -116,7 +103,6 @@
     flex-shrink: 0;
 }
 
-/* Hide navbar entirely when viewing a specific chat (/chats/:id) */
 .bar[data-hidden='true'] {
     display: none !important;
 }
@@ -131,12 +117,6 @@
 .profileLink:hover {
     box-shadow: 0 0 0 2px var(--green);
 }
-
-/* ---- Responsive: nav docks to the bottom edge as a tab bar ----
-   Below 700px the nav leaves the header row (which keeps just the logo
-   mark and the profile controls) and becomes a thumb-reachable tab bar.
-   Labels come back — there is room for them vertically, and without
-   them the bar is just four unlabelled glyphs. */
 
 @media (max-width: 700px) {
     .bar {
@@ -153,6 +133,7 @@
     }
 
     .header {
+        position: relative;
         gap: var(--space-2);
         padding-left: var(--space-3);
         padding-right: var(--space-3);
@@ -186,7 +167,7 @@
     .link {
         flex-direction: column;
         gap: 3px;
-        padding: 6px var(--space-3);
+        padding: 6px var(--space-2);
         border-radius: var(--radius-md);
     }
 
@@ -205,8 +186,6 @@
         line-height: 1.2;
     }
 
-    /* A solid pill per item would read as a row of buttons; the tab
-       bar wants a tint plus green text for the current section. */
     .active {
         color: var(--green);
         background: var(--green-tint);
@@ -220,10 +199,8 @@
     }
 
     .actions {
-        display: none;
-    }
-
-    .themeSwitcherDesktop {
-        display: none;
+        position: absolute;
+        right: var(--space-3);
+        bottom: calc(100% + var(--space-2));
     }
 }

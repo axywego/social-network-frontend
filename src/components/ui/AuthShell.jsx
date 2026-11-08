@@ -1,10 +1,7 @@
 import GlassCard from './GlassCard'
 import styles from './AuthShell.module.css'
 
-/**
- * Shared frame for Login / Register so the two pages cannot drift
- * apart again. Left column is the brand panel, hidden on mobile.
- */
+
 export default function AuthShell({ title, subtitle, children, footer }) {
     return (
         <div className={styles.page}>

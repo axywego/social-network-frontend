@@ -69,8 +69,6 @@ export function NotificationProvider({ children }) {
 
         const conn = notificationService.connectToSever({
             onEvent: (notification) => {
-                // Ban pushed by the admin panel: drop tokens and show
-                // the notice, the API would 403 on the next request anyway.
                 if (notification.type === 'banned') {
                     localStorage.removeItem('accessToken')
                     localStorage.removeItem('refreshToken')
@@ -79,7 +77,6 @@ export function NotificationProvider({ children }) {
                     return
                 }
 
-                // Обновление одного юзера: он стал онлайн/офлайн
                 if (notification.type === 'presence') {
                     setOnlineUsers(prev => {
                         const next = new Set(prev)
@@ -93,7 +90,6 @@ export function NotificationProvider({ children }) {
                     return
                 }
 
-                // Начальный снепшот текущего онлайна при подключении
                 if (notification.type === 'presence_snapshot') {
                     setOnlineUsers(new Set(notification.online))
                     return

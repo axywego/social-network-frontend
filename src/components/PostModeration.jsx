@@ -51,8 +51,6 @@ export default function PostModeration({ posts, setPosts, children }) {
         }
     }
 
-    // Complaints are filed against the author, so the post only tells
-    // us who to blame — the reason is picked in the modal.
     const handleReportPost = useCallback((post) => {
         setError('')
         setNotice('')

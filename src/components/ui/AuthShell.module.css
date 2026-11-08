@@ -13,15 +13,12 @@
     overflow: hidden;
 }
 
-/* ---- Brand panel (desktop only) ---- */
-
 .brand {
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
     padding: var(--space-8);
     border-right: 1px solid var(--glass-ring);
-    /* Tint the brand side green so the form side reads as clean glass. */
     background: linear-gradient(160deg, var(--green-tint) 0%, transparent 70%);
 }
 
@@ -86,8 +83,6 @@
     background: var(--green);
     box-shadow: 0 0 0 3px var(--green-tint);
 }
-
-/* ---- Form panel ---- */
 
 .panel {
     display: flex;

@@ -2,10 +2,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Button from './Button'
 import styles from './Pagination.module.css'
 
-/**
- * Page stepper for paginated lists. `pages` comes straight from the
- * API envelope; hides itself when there is nothing to page through.
- */
 export default function Pagination({ page = 1, pages = 1, total = 0, onChange, className = '' }) {
     if (total === 0 || pages <= 1) return null
 

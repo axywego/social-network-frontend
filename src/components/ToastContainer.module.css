@@ -17,8 +17,6 @@
     width: min(320px, calc(100vw - var(--space-8)));
     padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-lg);
-    /* Toasts sit on top of the page, so they need the strongest
-       glass in the system to stay readable over anything. */
     background: var(--glass-tint-strong);
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
@@ -93,7 +91,6 @@
     }
 }
 
-/* Sit above the bottom tab bar rather than on top of it. */
 @media (max-width: 700px) {
     .container {
         bottom: calc(var(--nav-bar-height) + var(--space-3) + env(safe-area-inset-bottom));

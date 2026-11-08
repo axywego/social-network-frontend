@@ -9,11 +9,6 @@ import styles from './ReportModal.module.css'
 
 const DUPLICATE_STATUS = 409
 
-/**
- * Reason picker behind every "Пожаловаться" action. A complaint is
- * filed against a user, so `target` is the reported account and
- * `subject` only describes where the report came from.
- */
 export default function ReportModal({ target, subject, onClose, onSubmitted }) {
     const [reasons, setReasons] = useState([])
     const [selectedId, setSelectedId] = useState(null)

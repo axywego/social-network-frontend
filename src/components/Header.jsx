@@ -21,8 +21,6 @@ function Header() {
     const location = useLocation()
     const isChatRoute = location.pathname.startsWith('/chats/') && location.pathname !== '/chats'
 
-    // Publish the real sticky-bar height so full-height views (chat) can
-    // offset themselves without hardcoding a magic number.
     useEffect(() => {
         const el = barRef.current
         if (!el) return
@@ -64,7 +62,7 @@ function Header() {
                 </nav>
 
                 <div className={styles.actions}>
-                    <ThemeSwitcher className={styles.themeSwitcherDesktop} />
+                    <ThemeSwitcher />
                 </div>
             </header>
         </div>

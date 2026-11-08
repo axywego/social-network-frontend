@@ -1,27 +1,3 @@
-/* ============================================================
-   Theme palettes
-   ------------------------------------------------------------
-   `tokens.css` holds the structural tokens (type, radii, spacing,
-   layout, motion) plus the `:root` palette, which is the "day"
-   theme and the pre-script default. This file carries every other
-   palette as an override on `<html data-theme="…">`.
-
-   A theme only redeclares PALETTE + GLASS tokens. Anything
-   structural stays in tokens.css, so adding a theme here never
-   means touching a component.
-
-   `--green*` is the *accent* slot, not a literal colour: components
-   reference it by role, which is what lets the accent travel across
-   the whole UI when the user switches theme.
-
-   The default `day` palette lives on `:root` in tokens.css; the
-   `system` preference is resolved to a concrete theme in JS
-   (ThemeContext), so no `prefers-color-scheme` block is needed here.
-   ============================================================ */
-
-/* ------------------------------------------------------------
-   night — the dark counterpart to `day`: same green, inverted.
-   ------------------------------------------------------------ */
 :root[data-theme='night'] {
     color-scheme: dark;
 
@@ -53,7 +29,6 @@
     --line-soft: #1A241D;
     --line-strong: #33453A;
 
-    /* Dark glass gains contrast instead of whitening. */
     --glass-tint: rgba(22, 33, 26, 0.66);
     --glass-tint-strong: rgba(26, 38, 30, 0.86);
     --glass-tint-quiet: rgba(18, 27, 21, 0.44);
@@ -66,9 +41,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.85);
 }
 
-/* ------------------------------------------------------------
-   mist — pale, cool and quiet. For reading-heavy sessions.
-   ------------------------------------------------------------ */
 :root[data-theme='mist'] {
     color-scheme: light;
 
@@ -112,10 +84,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(14, 22, 32, 0.36);
 }
 
-/* ------------------------------------------------------------
-   peach — warm daylight. Low contrast between surfaces keeps it
-   soft, so the accent carries the hierarchy.
-   ------------------------------------------------------------ */
 :root[data-theme='peach'] {
     color-scheme: light;
 
@@ -159,10 +127,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(30, 20, 16, 0.36);
 }
 
-/* ------------------------------------------------------------
-   ocean — deep and cool. Blur is pushed harder here because the
-   canvas is dark enough to carry it.
-   ------------------------------------------------------------ */
 :root[data-theme='ocean'] {
     color-scheme: dark;
 
@@ -207,11 +171,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.85);
 }
 
-/* ------------------------------------------------------------
-   sunset — warm dark. The amber accent is deliberately close to
-   the canvas so the UI reads as one warm mass, with the glass
-   rings doing the separation.
-   ------------------------------------------------------------ */
 :root[data-theme='sunset'] {
     color-scheme: dark;
 
@@ -256,10 +215,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.86);
 }
 
-/* ------------------------------------------------------------
-   graphite — neutral. The accent is near-monochrome on purpose;
-   feedback hues stay saturated so status never becomes ambiguous.
-   ------------------------------------------------------------ */
 :root[data-theme='graphite'] {
     color-scheme: dark;
 
@@ -291,8 +246,6 @@
     --line-soft: #1A1A1F;
     --line-strong: #37373F;
 
-    /* Minimal saturation boost: blur alone would wash the
-       near-neutral tints into flat grey. */
     --glass-tint: rgba(26, 26, 30, 0.64);
     --glass-tint-strong: rgba(30, 30, 35, 0.86);
     --glass-tint-quiet: rgba(22, 22, 26, 0.44);
@@ -305,12 +258,6 @@
     --glass-shadow-pop: 0 24px 60px -18px rgba(0, 0, 0, 0.9);
 }
 
-/* ------------------------------------------------------------
-   Theme transition
-   Applied only while a switch is in flight (`data-switching` is
-   set by ThemeContext, then removed) so the app never animates
-   its own colours on first paint.
-   ------------------------------------------------------------ */
 :root[data-switching] *,
 :root[data-switching] *::before,
 :root[data-switching] *::after {

@@ -11,10 +11,6 @@ const formatDate = (value) => new Date(value).toLocaleString('ru-RU', {
     minute: '2-digit'
 })
 
-/**
- * One pending complaint: who reported whom, the reason they picked
- * and the two moderation decisions an admin can take.
- */
 export default function ComplaintRow({ complaint, busy, onApprove, onDecline }) {
     return (
         <article className={styles.row}>

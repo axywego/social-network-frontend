@@ -1,12 +1,5 @@
 import styles from './GlassCard.module.css'
 
-/**
- * The one glass surface in the app. Composes the `.glass-surface`
- * utility from styles/glass.css so the four glass layers stay
- * defined in exactly one place.
- *
- * tone: base | strong | quiet
- */
 export default function GlassCard({
     as: Tag = 'div',
     tone = 'base',

@@ -34,8 +34,6 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
-        // A ban is terminal for this session: drop the tokens and show
-        // the notice instead of chasing a refresh that will also 403.
         if (isBanDetail(error.response?.data?.detail)) {
             localStorage.removeItem('accessToken')
             localStorage.removeItem('refreshToken')

@@ -11,8 +11,6 @@ function BannedPage() {
     const navigate = useNavigate()
     const banInfo = getBanInfo()
 
-    // Read once on mount: the notice must survive the reload the
-    // interceptor triggers, but must not stick around afterwards.
     useEffect(() => {
         clearBanInfo()
     }, [])
@@ -36,10 +34,10 @@ function BannedPage() {
                 <p className={styles.reason}>
                     {banInfo?.reason
                         ? `Причина: ${banInfo.reason}`
-                        : 'Причина обращения к администрации.'}
+                        : 'Причина не установлена.'}
                 </p>
                 <p className={styles.hint}>
-                    Если считаете бан ошибкой — опишите ситуацию администрации.
+                    Решение о бане может быть рассмотрено позже - однако вы на него не повлияете.
                 </p>
 
                 <Button variant="secondary" block onClick={handleLogout}>

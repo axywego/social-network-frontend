@@ -5,10 +5,6 @@ import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import styles from './AdminRow.module.css'
 
-/**
- * A person in one of the admin user lists. `unban` is only passed
- * on the banned tab, so the same row serves both lists.
- */
 export default function AdminUserRow({ user, busy, onUnban }) {
     const fullName = `${user.first_name} ${user.last_name}`.trim()
 

@@ -98,8 +98,6 @@ function AdminPage() {
         setError(null)
     }
 
-    // Runs a moderation action, then re-syncs the tab. Removing the
-    // last row of a page would otherwise leave an empty page behind.
     const refreshAfterRemoval = (remaining) => {
         if (remaining === 0 && page > 1) {
             goToPage(page - 1)
@@ -118,8 +116,6 @@ function AdminPage() {
             return true
         } catch (err) {
             console.error(err)
-            // The row is gone on the server's side (someone else handled
-            // it first) — resync instead of leaving a dead row on screen.
             if (err.response?.status === 404) {
                 setNotice('Запись уже обработана — список обновлён')
                 load(activeTab, page)

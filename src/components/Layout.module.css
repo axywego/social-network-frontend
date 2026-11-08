@@ -4,8 +4,6 @@
     min-height: 100dvh;
 }
 
-/* Single width authority for the whole app. Pages no longer
-   declare their own container width. */
 .main {
     flex: 1;
     width: 100%;
@@ -20,20 +18,16 @@
     }
 }
 
-/* Clear the fixed bottom tab bar. Declared after the block above so it
-   still wins over its padding shorthand at 640px and below. */
 @media (max-width: 700px) {
     .main {
         padding-bottom: calc(var(--space-10) + var(--nav-bar-height) + env(safe-area-inset-bottom));
     }
 
-    /* When the bottom bar is hidden (e.g. specific chat route), remove its clearance. */
     body:has([data-hidden='true']) .main {
         padding-bottom: var(--space-10);
     }
 }
 
-/* Chat window manages its own full-bleed height. */
 .main:has(> [data-fullbleed]) {
     padding: 0;
     max-width: none;

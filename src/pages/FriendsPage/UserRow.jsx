@@ -4,10 +4,6 @@ import Avatar from '../../components/Avatar'
 import Button from '../../components/ui/Button'
 import styles from './UserRow.module.css'
 
-/**
- * One person in a friend/search/request list, with the action
- * buttons appropriate to the current relation.
- */
 export default function UserRow({ user, actions, online = false }) {
     const fullName = `${user.first_name} ${user.last_name}`.trim()
 

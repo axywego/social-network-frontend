@@ -3,8 +3,6 @@
     flex-shrink: 0;
 }
 
-/* ---- Trigger ---- */
-
 .trigger {
     display: flex;
     align-items: center;
@@ -38,12 +36,6 @@
     white-space: nowrap;
 }
 
-/* ---- Menu ---- */
-
-/* The wrapper owns the anchoring; the inner panel owns the glass.
-   `.glass-surface` forces `position: relative` (its ::before/::after
-   need a positioned ancestor) and glass.css is injected after CSS
-   modules, so positioning and the glass cannot live on one element. */
 .menu {
     position: absolute;
     top: calc(100% + var(--space-2));
@@ -63,6 +55,17 @@
     from {
         opacity: 0;
         transform: translateY(-6px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes menu-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.97);
     }
     to {
         opacity: 1;
@@ -128,8 +131,6 @@
     flex-shrink: 0;
 }
 
-/* ---- Responsive: icon-only, like the nav links ---- */
-
 @media (max-width: 700px) {
     .trigger {
         width: 38px;
@@ -142,6 +143,18 @@
     }
 
     .menu {
-        right: -4px;
+        top: auto;
+        right: 0;
+        bottom: calc(100% + var(--space-2));
+    }
+
+    .panel {
+        max-height: calc(
+            100dvh - var(--nav-bar-height) - 80px - env(safe-area-inset-bottom)
+        );
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        animation-name: menu-in-up;
+        transform-origin: bottom right;
     }
 }

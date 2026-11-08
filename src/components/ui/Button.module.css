@@ -25,8 +25,6 @@
     opacity: 0.45;
 }
 
-/* ---- Sizes ---- */
-
 .sm {
     padding: 6px 12px;
     font-size: var(--text-sm);
@@ -42,9 +40,6 @@
     font-size: var(--text-md);
 }
 
-/* Square pill for icon-only actions. Declared after the size blocks so
-   the zeroed padding wins on source order; callers must supply an
-   aria-label and a title, since there is no visible text. */
 .iconOnly {
     padding: 0;
     gap: 0;
@@ -65,8 +60,6 @@
     width: 100%;
 }
 
-/* Long labels inside a constrained flex parent (profile action rows)
-   ellipsize instead of overflowing the glass pill. */
 .label {
     min-width: 0;
     overflow: hidden;
@@ -83,8 +76,6 @@
 .sm .icon { width: 1em; height: 1em; }
 .lg .icon { width: 1.15em; height: 1.15em; }
 
-/* ---- Variants ---- */
-
 .primary {
     background: var(--green);
     color: var(--green-on);
@@ -96,7 +87,6 @@
     box-shadow: 0 10px 24px -8px var(--green);
 }
 
-/* Secondary is itself a pane of glass. */
 .secondary {
     background: var(--glass-tint-quiet);
     backdrop-filter: blur(calc(var(--glass-blur) * 0.5));

@@ -1,10 +1,6 @@
 import { useId } from 'react'
 import styles from './Field.module.css'
 
-/**
- * Labelled form control. Renders a <textarea> when `as="textarea"`.
- * Wires up id / label / hint / error association automatically.
- */
 export default function Field({
     as = 'input',
     label,

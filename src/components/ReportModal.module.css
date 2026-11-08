@@ -33,8 +33,6 @@
     outline: none;
 }
 
-/* ---- Header ---- */
-
 .header {
     display: flex;
     align-items: flex-start;
@@ -97,8 +95,6 @@
     color: var(--ink-soft);
 }
 
-/* ---- Reasons ---- */
-
 .reasons {
     list-style: none;
     margin: 0;
@@ -137,8 +133,6 @@
     font-size: var(--text-base);
     color: var(--ink);
 }
-
-/* ---- Footer ---- */
 
 .footer {
     display: flex;

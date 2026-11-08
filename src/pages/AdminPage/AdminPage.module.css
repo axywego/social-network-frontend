@@ -6,8 +6,6 @@
     gap: var(--space-4);
 }
 
-/* ---- Segmented tabs ---- */
-
 .tabs {
     display: flex;
     gap: 2px;
@@ -76,8 +74,6 @@
     background: var(--green-on);
     color: var(--green);
 }
-
-/* ---- List ---- */
 
 .list {
     display: flex;

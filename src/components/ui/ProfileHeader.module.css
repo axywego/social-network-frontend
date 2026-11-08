@@ -31,7 +31,6 @@
     gap: var(--space-3);
 }
 
-/* A long name wraps rather than squeezing the trailing action. */
 .nameRow > :not(.name) {
     flex-shrink: 0;
 }
@@ -69,8 +68,6 @@
     height: 16px;
     color: var(--green);
 }
-
-/* ---- Stats ---- */
 
 .stats {
     display: flex;
@@ -118,8 +115,6 @@ button.stat:hover {
     font-weight: 600;
     color: var(--ink);
 }
-
-/* ---- Actions ---- */
 
 .actions {
     display: flex;

@@ -52,8 +52,6 @@ export const postService = {
         return data
     },
 
-    // Загрузка картинки без привязки к посту — для создания нового поста,
-    // когда post_id ещё не существует (см. PostComposer).
     async uploadImage(file) {
         const formData = new FormData()
         formData.append('file', file)

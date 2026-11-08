@@ -8,11 +8,6 @@ const ICONS = {
     info: Info,
 }
 
-/**
- * Inline status banner. Use for form-level and request-level
- * feedback; it replaces the ad-hoc `.error` blocks that were
- * duplicated across every page module.
- */
 export default function Alert({ tone = 'error', action, className = '', children }) {
     const Icon = ICONS[tone] ?? Info
 

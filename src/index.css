@@ -1,9 +1,3 @@
-/* ============================================================
-   Base layer — reset + element defaults.
-   Cooperates with tokens.css. No colours or sizes are invented
-   here; everything resolves to a token.
-   ============================================================ */
-
 *,
 *::before,
 *::after {
@@ -31,8 +25,6 @@ body {
     font-synthesis: none;
 }
 
-/* The canvas gets a slow green wash so translucent panels have
-   something with depth to refract. Fixed so it does not scroll. */
 body::before {
     content: '';
     position: fixed;
@@ -98,7 +90,6 @@ h3 { font-size: var(--text-lg); }
     color: var(--ink);
 }
 
-/* Scrollbars follow the palette instead of the OS default. */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--line-strong) transparent;
@@ -125,7 +116,6 @@ h3 { font-size: var(--text-lg); }
     background-clip: content-box;
 }
 
-/* Visible only to assistive tech. */
 .visually-hidden {
     position: absolute;
     width: 1px;

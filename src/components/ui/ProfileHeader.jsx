@@ -2,11 +2,6 @@ import { Cake } from 'lucide-react'
 import Avatar from '../Avatar'
 import styles from './ProfileHeader.module.css'
 
-/**
- * Shared identity card for the own profile and other users'
- * profiles. Callers supply the stats and actions so the two pages
- * keep their own behaviour while sharing one layout.
- */
 export default function ProfileHeader({ profile, isOnline = false, avatarOverlay, nameAction, stats = [], actions }) {
     const fullName = [profile.last_name, profile.first_name, profile.patronymic]
         .filter(Boolean)

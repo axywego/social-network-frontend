@@ -29,10 +29,6 @@ function PostCard({ post, author }) {
     const isEditing = post.id === editingPostId
 
     const [editText, setEditText] = useState(post.content || '')
-    // Изображение, прикреплённое к редактируемому посту. filename — то, что уйдёт
-    // в image_url при сохранении: существующий путь (если не трогали), новый путь
-    // (если заменили) или null (если убрали). Пока не сохранили — на сам пост
-    // это никак не влияет.
     const [pendingImage, setPendingImage] = useState(
         post.image_url ? { filename: post.image_url, previewUrl: postService.resolveImageUrl(post.image_url), uploading: false } : null
     )
@@ -143,7 +139,7 @@ function PostCard({ post, author }) {
         e.preventDefault()
         if (editSaving || pendingImage?.uploading) return
         const trimmedText = editText.trim()
-        if (!trimmedText && !pendingImage) return // нечего сохранять — ни текста, ни фото
+        if (!trimmedText && !pendingImage) return
 
         setEditSaving(true)
         try {
@@ -173,7 +169,7 @@ function PostCard({ post, author }) {
 
     const handleEditImageChange = async (e) => {
         const file = e.target.files[0]
-        e.target.value = '' // чтобы можно было выбрать тот же файл повторно
+        e.target.value = ''
         if (!file) return
 
         const validationError = validateImageFile(file)
@@ -190,7 +186,6 @@ function PostCard({ post, author }) {
         try {
             const { filename } = await postService.uploadPostImage(post.id, file)
             setPendingImage(prev =>
-                // если юзер уже убрал/сменил картинку, пока эта грузилась — не воскрешаем её
                 prev && prev.previewUrl === previewUrl ? { ...prev, filename, uploading: false } : prev
             )
         } catch (err) {

@@ -25,11 +25,8 @@ import { validateImageFile } from '../../utils/imageFile'
 import styles from './ChatWindowPage.module.css'
 
 const PAGE_SIZE = 30
-// Стартовый индекс с большим запасом, чтобы firstItemIndex никогда не ушёл в минус
-// после многократной подгрузки старых сообщений (см. доку react-virtuoso, паттерн "prepend").
 const START_INDEX = 1_000_000
 
-// ─── Отдельный компонент сообщения ─────────────────────────────────────────
 function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }) {
     const longPressTimer = useRef(null)
     const touchMoved = useRef(false)
@@ -87,7 +84,6 @@ function MessageBubble({ message, isOwn, onContextMenu, sender, showSenderInfo }
     )
 }
 
-// ─── Попап "правый клик" (редактировать / удалить), как в Телеге ──────────
 function MessageContextMenu({ x, y, onEdit, onDelete, onClose }) {
     const menuRef = useRef(null)
 
@@ -98,7 +94,6 @@ function MessageContextMenu({ x, y, onEdit, onDelete, onClose }) {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') onClose()
         }
-        // capture:true чтобы поймать клик раньше, чем сработает contextmenu на другом сообщении
         document.addEventListener('mousedown', handleClickOutside, true)
         document.addEventListener('contextmenu', handleClickOutside, true)
         document.addEventListener('keydown', handleKeyDown)
@@ -111,7 +106,6 @@ function MessageContextMenu({ x, y, onEdit, onDelete, onClose }) {
         }
     }, [onClose])
 
-    // Не даём попапу вылезти за правый/нижний край экрана
     const style = {
         top: Math.min(y, window.innerHeight - 110),
         left: Math.min(x, window.innerWidth - 190),
@@ -150,8 +144,6 @@ function ChatWindowPage() {
 
     const [chatName, setChatName] = useState('')
     const [chatType, setChatType] = useState(null)
-    // const [messages, setMessages] = useState([])
-    // const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX)
     const [listState, setListState] = useState({ messages: [], firstItemIndex: START_INDEX })
     const [text, setText] = useState('')
     const [loading, setLoading] = useState(true)
@@ -166,18 +158,13 @@ function ChatWindowPage() {
     const currentUserRef = useRef(currentUser)
     currentUserRef.current = currentUser
 
-    // Всегда содержит актуальный массив сообщений — чтобы не тащить messages
-    // в зависимости колбэков (startReached и т.п. не должны пересоздаваться каждый рендер)
     const messagesStateRef = useRef([])
     messagesStateRef.current = listState.messages
 
     const loadingOlderRef = useRef(false)
     const hasMoreOlderRef = useRef(true)
 
-    // Отслеживаем "у низа ли пользователь" через колбэк Virtuoso, а не через ручной onScroll
     const atBottomRef = useRef(true)
-    // Взводится перед setMessages, когда новое сообщение должно принудительно проскроллить вниз
-    // (своё сообщение — всегда, чужое — только если и так были у низа)
     const forceFollowRef = useRef(false)
 
     const [showMembers, setShowMembers] = useState(false)
@@ -188,13 +175,9 @@ function ChatWindowPage() {
 
     const [otherUserId, setOtherUserId] = useState(null)
 
-    // Попап "редактировать / удалить" по правому клику на своё сообщение
-    const [contextMenu, setContextMenu] = useState(null) // { x, y, message } | null
-    // Сообщение, которое сейчас редактируется (картинка живёт отдельно в pendingImage)
-    const [editingMessage, setEditingMessage] = useState(null) // { id } | null
-    // Изображение, прикреплённое к полю ввода — общее и для нового сообщения, и для редактирования.
-    // filename === null && присутствует => картинка убрана/ещё не выбрана.
-    const [pendingImage, setPendingImage] = useState(null) // { filename, width, height, previewUrl, uploading } | null
+    const [contextMenu, setContextMenu] = useState(null)
+    const [editingMessage, setEditingMessage] = useState(null)
+    const [pendingImage, setPendingImage] = useState(null)
 
     useEffect(() => {
         const previewUrl = pendingImage?.previewUrl
@@ -206,10 +189,8 @@ function ChatWindowPage() {
     const textInputRef = useRef(null)
     const wsRef = useRef(null)
 
-    // Быстрый поиск участника группы по id — для аватарки и имени в шапке сообщений
     const memberMap = useMemo(() => new Map(members.map(m => [m.id, m])), [members])
 
-    // ─── WebSocket ───────────────────────────────────────────────────────────
     useEffect(() => {
         const conn = chatService.connectToChat(chatId, {
             onOpen: () => {
@@ -251,14 +232,12 @@ function ChatWindowPage() {
         }
     }, [chatId])
 
-    // ─── Смена чата ──────────────────────────────────────────────────────────
     useEffect(() => {
         setShowMembers(false)
         setHasMoreOlder(true)
         hasMoreOlderRef.current = true
         atBottomRef.current = true
         loadData()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId])
 
     const loadData = async () => {
@@ -276,7 +255,6 @@ function ChatWindowPage() {
             setHasMoreOlder(msgs.length === PAGE_SIZE)
             hasMoreOlderRef.current = msgs.length === PAGE_SIZE
 
-            // помечаем прочитанным последнее подгруженное сообщение
             const last = msgs[msgs.length - 1]
             if (last) {
                 wsRef.current?.markRead(last.id)
@@ -288,7 +266,6 @@ function ChatWindowPage() {
                 setOtherUserId(other?.id ?? null)
             } else if (chat?.type === 'group') {
                 setOtherUserId(null)
-                // нужны для аватарки + имени отправителя в шапке сообщений
                 const chatMembers = await chatService.getChatMembers(chatId)
                 setMembers(chatMembers)
             } else {
@@ -302,7 +279,6 @@ function ChatWindowPage() {
         }
     }
 
-    // ─── Подгрузка старых сообщений (вызывается Virtuoso при достижении верха) ─
     const loadOlderMessages = useCallback(async () => {
         if (loadingOlderRef.current || !hasMoreOlderRef.current) return
 
@@ -325,7 +301,6 @@ function ChatWindowPage() {
         }
     }, [chatId])
 
-    // followOutput решает, скроллить ли вниз при добавлении новых сообщений в конец
     const followOutput = useCallback((isAtBottom) => {
         if (forceFollowRef.current) {
             forceFollowRef.current = false
@@ -384,7 +359,6 @@ function ChatWindowPage() {
         }
     }
 
-    // Сбрасывает всё состояние поля ввода (после отправки, отмены редактирования и т.п.)
     const resetCompose = () => {
         if (pendingImage?.previewUrl?.startsWith('blob:')) {
             URL.revokeObjectURL(pendingImage.previewUrl)
@@ -397,8 +371,8 @@ function ChatWindowPage() {
     const handleSend = async (e) => {
         e.preventDefault()
         const trimmed = text.trim()
-        if (!trimmed && !pendingImage) return // нечего отправлять
-        if (pendingImage?.uploading) return // ждём, пока картинка догрузится
+        if (!trimmed && !pendingImage) return
+        if (pendingImage?.uploading) return
 
         if (editingMessage) {
             const messageId = editingMessage.id
@@ -439,7 +413,6 @@ function ChatWindowPage() {
         }
     }
 
-    // ─── Попап "правый клик" на сообщении ──────────────────────────────────
     const handleBubbleContextMenu = (e, message) => {
         e.preventDefault()
         setContextMenu({ x: e.clientX, y: e.clientY, message })
@@ -449,14 +422,11 @@ function ChatWindowPage() {
         if (!contextMenu) return
         const { message } = contextMenu
 
-        // если до этого что-то было прикреплено к полю ввода — подчищаем
         if (pendingImage?.previewUrl?.startsWith('blob:')) {
             URL.revokeObjectURL(pendingImage.previewUrl)
         }
 
         if (message.image_url) {
-            // message.image_url — это уже готовый путь вида /chats/{chatId}/images/{filename},
-            // а бэкенду на edit нужно именно имя файла (как при отправке), поэтому достаём его из пути
             const filename = message.image_url.split('/').pop()
             setPendingImage({
                 filename,
@@ -472,7 +442,6 @@ function ChatWindowPage() {
         setEditingMessage({ id: message.id })
         setText(message.content || '')
         setContextMenu(null)
-        // даём React дорисовать инпут перед фокусом
         requestAnimationFrame(() => textInputRef.current?.focus())
     }
 
@@ -492,7 +461,6 @@ function ChatWindowPage() {
         const messageId = contextMenu.message.id
         setContextMenu(null)
 
-        // оптимистично убираем сообщение из списка
         setListState(prev => ({
             ...prev,
             messages: prev.messages.filter(m => m.id !== messageId),
@@ -504,14 +472,13 @@ function ChatWindowPage() {
         } catch (err) {
             console.error(err)
             setError('Не удалось удалить сообщение')
-            // откатываемся — перезагружаем чат, если удаление не удалось
             loadData()
         }
     }
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0]
-        e.target.value = '' // чтобы можно было выбрать тот же файл повторно
+        e.target.value = ''
         if (!file) return
 
         const validationError = validateImageFile(file)
@@ -521,7 +488,6 @@ function ChatWindowPage() {
         }
         setError(null)
 
-        // локальный превью показываем сразу, не дожидаясь загрузки на сервер
         if (pendingImage?.previewUrl?.startsWith('blob:')) {
             URL.revokeObjectURL(pendingImage.previewUrl)
         }
@@ -532,7 +498,6 @@ function ChatWindowPage() {
         try {
             const { filename, width, height } = await chatService.uploadChatImage(chatId, file)
             setPendingImage(prev =>
-                // если юзер уже убрал/сменил картинку, пока эта грузилась — не воскрешаем её
                 prev && prev.previewUrl === previewUrl
                     ? { ...prev, filename, width, height, uploading: false }
                     : prev
@@ -652,9 +617,6 @@ function ChatWindowPage() {
 
             <div className={styles.messagesWrapper}>
                 <Virtuoso
-                    // key={chatId} форсит полный ремаунт списка при смене чата —
-                    // так внутреннее состояние скролла/индексов Virtuoso не "утекает"
-                    // из одного чата в другой.
                     key={chatId}
                     ref={virtuosoRef}
                     className={styles.messages}
@@ -665,12 +627,9 @@ function ChatWindowPage() {
                         START_INDEX + listState.messages.length - 1
                     }
                     computeItemKey={(index, message) => message.id}
-                    // alignToBottom
                     startReached={loadOlderMessages}
                     followOutput={followOutput}
                     atBottomThreshold={120}
-                    // Без этого ResizeObserver может давать визуальный рывок при prepend старых сообщений
-                    // из-за отложенного пересчёта viewport.
                     skipAnimationFrameInResizeObserver
                     atBottomStateChange={(atBottom) => {
                         atBottomRef.current = atBottom
@@ -681,14 +640,7 @@ function ChatWindowPage() {
                     }}
                     increaseViewportBy={{ top: 400, bottom: 200 }}
                     components={{
-                        // Индикатор подгрузки теперь часть Header, а не внешний сосед
-                        // над Virtuoso: так он не меняет высоту контейнера списка
-                        // (это и дёргало скролл при prepend старых сообщений).
                         Header: () => (
-                            // Высота фиксирована всегда (см. .headerSpacer в CSS,
-                            // например min-height: 32px) — меняется только
-                            // видимость текста, а не сама высота блока,
-                            // иначе прыжок просто переместится сюда.
                             <div className={styles.headerSpacer}>
                                 <div
                                     className={styles.loadingOlder}
